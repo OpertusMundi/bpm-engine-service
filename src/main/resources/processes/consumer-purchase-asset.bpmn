@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:message id="Message_0hc6lwe" name="Message-Delivery-Confirmed-By-User" />
+  <bpmn:message id="Message_0yo1q8f" name="Message-Payment-Completed" />
+  <bpmn:collaboration id="Collaboration_19yohzd">
+    <bpmn:participant id="Topio_Platform" name="Topio Platform" processRef="consumer_purchase_asset" />
+    <bpmn:participant id="External_Delivery" name="External Delivery" processRef="consumer-purchase-external-delivery" />
+    <bpmn:messageFlow id="Flow_0hfyyba" sourceRef="Notify_Seller" targetRef="Seller_Notified" />
+    <bpmn:messageFlow id="Flow_0w62erf" sourceRef="Order_Fulfilled_Throw" targetRef="Order_Fulfilled_Catch" />
+  </bpmn:collaboration>
+  <bpmn:process id="consumer_purchase_asset" name="consumer-purchase-asset" isExecutable="true">
+    <bpmn:startEvent id="Cart_Ready" name="Cart Ready">
+      <bpmn:outgoing>Flow_1a9kqpm</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Create_Order" name="Create Order" camunda:asyncBefore="true" camunda:type="external" camunda:topic="createOrderSeviceTask">
+      <bpmn:incoming>Flow_1a9kqpm</bpmn:incoming>
+      <bpmn:outgoing>Flow_1670xmr</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:eventBasedGateway id="Gateway_1">
+      <bpmn:incoming>Flow_1670xmr</bpmn:incoming>
+      <bpmn:outgoing>Flow_0rkq1dv</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1mlwr7l</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="Wait_XX_Hours" name="Wait XX Hours">
+      <bpmn:incoming>Flow_0rkq1dv</bpmn:incoming>
+      <bpmn:outgoing>Flow_13q94e2</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1ccdta0">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P0Y0M0DT0H0M10S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="Order_Cancelled" name="Order Cancelled">
+      <bpmn:incoming>Flow_04gerr7</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_16n2ulw" />
+    </bpmn:endEvent>
+    <bpmn:intermediateCatchEvent id="TC_Userss_Response" name="T&#38;C Users&#39;s Response">
+      <bpmn:incoming>Flow_1mlwr7l</bpmn:incoming>
+      <bpmn:outgoing>Flow_09jonrg</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_14opor7" messageRef="Message_19dcyzb" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Accepted" name="Accepted?" camunda:asyncBefore="true">
+      <bpmn:incoming>Flow_09jonrg</bpmn:incoming>
+      <bpmn:outgoing>TNC_Yes</bpmn:outgoing>
+      <bpmn:outgoing>TNC_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Cancel_Order" name="Cancel Order" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelOrderSeviceTask">
+      <bpmn:incoming>Flow_13q94e2</bpmn:incoming>
+      <bpmn:incoming>TNC_No</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cubqjj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Email_User_Order_Confirmed" name="Email User / Order Confirmed" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendEmailServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="emailType">Confirmed</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>TNC_Yes</bpmn:incoming>
+      <bpmn:outgoing>Flow_12zaepb</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Email_User_Order_Cancelled" name="Email User / Order Cancelled" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendEmailServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="emailType">Cancelled</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0cubqjj</bpmn:incoming>
+      <bpmn:outgoing>Flow_04gerr7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="Event_0fzli41" name="Payment Completed">
+      <bpmn:incoming>Flow_12zaepb</bpmn:incoming>
+      <bpmn:outgoing>Flow_04w1u7q</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1iaxf0j" messageRef="Message_0yo1q8f" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Asset_To_Be_Delivered_By_Platform" name="Asset To Be Delivered By Platform?">
+      <bpmn:incoming>Flow_04w1u7q</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xpu88d</bpmn:outgoing>
+      <bpmn:outgoing>Flow_000dray</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_04w1u7q" sourceRef="Event_0fzli41" targetRef="Asset_To_Be_Delivered_By_Platform" />
+    <bpmn:sequenceFlow id="Flow_04gerr7" sourceRef="Email_User_Order_Cancelled" targetRef="Order_Cancelled" />
+    <bpmn:sequenceFlow id="Flow_12zaepb" sourceRef="Email_User_Order_Confirmed" targetRef="Event_0fzli41" />
+    <bpmn:sequenceFlow id="Flow_0cubqjj" sourceRef="Cancel_Order" targetRef="Email_User_Order_Cancelled" />
+    <bpmn:sequenceFlow id="TNC_No" name="No" sourceRef="Accepted" targetRef="Cancel_Order">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${AcceptedTermsAndCond=="No"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="TNC_Yes" name="Yes" sourceRef="Accepted" targetRef="Email_User_Order_Confirmed">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${AcceptedTermsAndCond=="Yes"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1mlwr7l" sourceRef="Gateway_1" targetRef="TC_Userss_Response" />
+    <bpmn:sequenceFlow id="Flow_09jonrg" sourceRef="TC_Userss_Response" targetRef="Accepted" />
+    <bpmn:sequenceFlow id="Flow_13q94e2" sourceRef="Wait_XX_Hours" targetRef="Cancel_Order" />
+    <bpmn:sequenceFlow id="Flow_0rkq1dv" sourceRef="Gateway_1" targetRef="Wait_XX_Hours" />
+    <bpmn:sequenceFlow id="Flow_1670xmr" sourceRef="Create_Order" targetRef="Gateway_1" />
+    <bpmn:sequenceFlow id="Flow_1a9kqpm" sourceRef="Cart_Ready" targetRef="Create_Order" />
+    <bpmn:sequenceFlow id="Flow_0xpu88d" name="Yes" sourceRef="Asset_To_Be_Delivered_By_Platform" targetRef="Email_User_Purchase_Receipt">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${DeliveryByPlatform=="Yes"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sendTask id="Notify_Seller" name="Notify Seller" camunda:asyncBefore="true" camunda:expression="${execution.getProcessEngineServices().getRuntimeService().createMessageCorrelation(&#34;Message-Seller-Is-Notified&#34;).setVariable(&#34;DeliveryMeans&#34;, execution.getVariable(&#34;DeliveryMeans&#34;)).setVariable(&#34;correlationId&#34;, execution.getBusinessKey()).processInstanceBusinessKey(execution.getBusinessKey()).correlateWithResult()}">
+      <bpmn:incoming>Flow_000dray</bpmn:incoming>
+      <bpmn:outgoing>Flow_1x8aks8</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="Flow_000dray" name="No" sourceRef="Asset_To_Be_Delivered_By_Platform" targetRef="Notify_Seller">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${DeliveryByPlatform=="No"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0aw4mgq" sourceRef="Complete_Order" targetRef="Order_Completed" />
+    <bpmn:serviceTask id="Email_User_Purchase_Receipt" name="Email User / Purchase Receipt" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendEmailServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="emailType">Receipt</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0xpu88d</bpmn:incoming>
+      <bpmn:outgoing>Flow_1225v0t</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1225v0t" sourceRef="Email_User_Purchase_Receipt" targetRef="Gateway_0vsgcxg" />
+    <bpmn:sequenceFlow id="Flow_141d0wz" sourceRef="Order_Fulfilled_Catch" targetRef="Gateway_0vsgcxg" />
+    <bpmn:sequenceFlow id="Flow_05y46n0" sourceRef="Gateway_0vsgcxg" targetRef="Complete_Order" />
+    <bpmn:sequenceFlow id="Flow_1x8aks8" sourceRef="Notify_Seller" targetRef="Order_Fulfilled_Catch" />
+    <bpmn:intermediateCatchEvent id="Order_Fulfilled_Catch" name="Order Fulfilled">
+      <bpmn:incoming>Flow_1x8aks8</bpmn:incoming>
+      <bpmn:outgoing>Flow_141d0wz</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0j7o06a" messageRef="Message_1jfyw3a" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="Complete_Order" name="Complete Order" camunda:asyncBefore="true" camunda:type="external" camunda:topic="completeOrderSeviceTask">
+      <bpmn:incoming>Flow_05y46n0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0aw4mgq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_0vsgcxg">
+      <bpmn:incoming>Flow_141d0wz</bpmn:incoming>
+      <bpmn:incoming>Flow_1225v0t</bpmn:incoming>
+      <bpmn:outgoing>Flow_05y46n0</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Order_Completed" name="Order Completed">
+      <bpmn:incoming>Flow_0aw4mgq</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_04gma65" />
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmn:process id="consumer-purchase-external-delivery" name="consumer-purchase-external-delivery" isExecutable="true">
+    <bpmn:sequenceFlow id="Flow_19k3ssp" sourceRef="Seller_Notified" targetRef="Delivery_Means" />
+    <bpmn:sequenceFlow id="Flow_0hktysm" name="Digital" sourceRef="Delivery_Means" targetRef="Seller_Provides_Asset_URL">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${DeliveryMeans=="Digital"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_18a5kgk" sourceRef="Gateway_1o77nv9" targetRef="Gateway_18opz2z" />
+    <bpmn:sequenceFlow id="Flow_1xwj9w1" sourceRef="Notify_User_Asset_Available" targetRef="Gateway_1o77nv9" />
+    <bpmn:sequenceFlow id="Flow_077pv1a" name="Physical" sourceRef="Delivery_Means" targetRef="Asset_Dispatched">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${DeliveryMeans=="Physical"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0366wrz" sourceRef="Asset_Dispatched" targetRef="Notify_User_Asset_Dispatched" />
+    <bpmn:sequenceFlow id="Flow_012p11y" sourceRef="Notify_User_Asset_Dispatched" targetRef="Email_User_Asset_Dispatched" />
+    <bpmn:sequenceFlow id="Flow_193l7w6" sourceRef="Email_User_Purchase_Receipt_2" targetRef="Transfer_Payment_To_Seller" />
+    <bpmn:sequenceFlow id="Flow_1s2s4sw" sourceRef="Transfer_Payment_To_Seller" targetRef="Email_Seller_Payment_Transferred" />
+    <bpmn:sequenceFlow id="Flow_0ohkuc4" sourceRef="Order_Fulfilled_Throw" targetRef="Event_03lmvz7" />
+    <bpmn:sequenceFlow id="Flow_02dd2os" sourceRef="Generate_Taxation_Document" targetRef="Order_Fulfilled_Throw" />
+    <bpmn:sequenceFlow id="Flow_1ig885l" sourceRef="Email_Seller_Payment_Transferred" targetRef="Generate_Taxation_Document" />
+    <bpmn:sequenceFlow id="Flow_1w2mnd7" sourceRef="Gateway_18opz2z" targetRef="Delivery_Confirmed_By_User" />
+    <bpmn:sequenceFlow id="Flow_1m17fx0" sourceRef="Gateway_18opz2z" targetRef="Wait_XX_Hours_2" />
+    <bpmn:sequenceFlow id="Flow_0sj5hyr" sourceRef="Delivery_Confirmed_By_User" targetRef="Email_User_Purchase_Receipt_2" />
+    <bpmn:sequenceFlow id="Flow_1dx5kmf" sourceRef="Wait_XX_Hours_2" targetRef="Email_User_Purchase_Receipt_2" />
+    <bpmn:sequenceFlow id="Flow_1244w3z" sourceRef="Email_User_Asset_Dispatched" targetRef="Gateway_1o77nv9" />
+    <bpmn:userTask id="Transfer_Payment_To_Seller" name="Transfer Payment To Seller" camunda:asyncBefore="true">
+      <bpmn:incoming>Flow_193l7w6</bpmn:incoming>
+      <bpmn:outgoing>Flow_1s2s4sw</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="Generate_Taxation_Document" name="Generate Taxation Document" camunda:asyncBefore="true" camunda:type="external" camunda:topic="generateTaxationDocumentSeviceTask">
+      <bpmn:incoming>Flow_1ig885l</bpmn:incoming>
+      <bpmn:outgoing>Flow_02dd2os</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Email_User_Purchase_Receipt_2" name="Email User / Purchase Receipt" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendEmailServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="emailType">Receipt</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0sj5hyr</bpmn:incoming>
+      <bpmn:incoming>Flow_1dx5kmf</bpmn:incoming>
+      <bpmn:outgoing>Flow_193l7w6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="Wait_XX_Hours_2" name="Wait XX Hours">
+      <bpmn:incoming>Flow_1m17fx0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1dx5kmf</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1ne35pn">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P0Y0M0DT0H0M10S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="Delivery_Confirmed_By_User" name="Delivery Confirmed By User">
+      <bpmn:incoming>Flow_1w2mnd7</bpmn:incoming>
+      <bpmn:outgoing>Flow_0sj5hyr</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0ql3u62" messageRef="Message_0hc6lwe" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="Email_Seller_Payment_Transferred" name="Email Seller / Payment Transferred" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendEmailServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="emailType">Paid</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1s2s4sw</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ig885l</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="Order_Fulfilled_Throw" name="Order Fulfilled" camunda:asyncBefore="true" camunda:expression="${execution.getProcessEngineServices().getRuntimeService().createMessageCorrelation(&#34;Message-Order-Fulfilled&#34;).correlate()}">
+      <bpmn:incoming>Flow_02dd2os</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ohkuc4</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="Event_03lmvz7">
+      <bpmn:incoming>Flow_0ohkuc4</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_04p5o0v" />
+    </bpmn:endEvent>
+    <bpmn:startEvent id="Seller_Notified" name="Seller Notified">
+      <bpmn:outgoing>Flow_19k3ssp</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0ljmgh8" messageRef="Message_09e8i18" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0pal2tl" sourceRef="Seller_Provides_Asset_URL" targetRef="Notify_User_Asset_Available" />
+    <bpmn:exclusiveGateway id="Gateway_1o77nv9">
+      <bpmn:incoming>Flow_1xwj9w1</bpmn:incoming>
+      <bpmn:incoming>Flow_1244w3z</bpmn:incoming>
+      <bpmn:outgoing>Flow_18a5kgk</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Delivery_Means" name="Delivery Means">
+      <bpmn:incoming>Flow_19k3ssp</bpmn:incoming>
+      <bpmn:outgoing>Flow_0hktysm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_077pv1a</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:intermediateCatchEvent id="Asset_Dispatched" name="Asset Dispatched">
+      <bpmn:incoming>Flow_077pv1a</bpmn:incoming>
+      <bpmn:outgoing>Flow_0366wrz</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0e9308e" messageRef="Message_034tmjw" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="Notify_User_Asset_Dispatched" name="Notify User / Asset Dispatched" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotificationServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">Asset_Dispatched</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0366wrz</bpmn:incoming>
+      <bpmn:outgoing>Flow_012p11y</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Email_User_Asset_Dispatched" name="Email User / Asset Dispatched" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendEmailServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="emailType">Asset_Dispatched</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_012p11y</bpmn:incoming>
+      <bpmn:outgoing>Flow_1244w3z</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Notify_User_Asset_Available" name="Notify User / Asset Available" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotificationServiceTask">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="entityType">Purchase</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">Asset_Available</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0pal2tl</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xwj9w1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:eventBasedGateway id="Gateway_18opz2z">
+      <bpmn:incoming>Flow_18a5kgk</bpmn:incoming>
+      <bpmn:outgoing>Flow_1w2mnd7</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1m17fx0</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:userTask id="Seller_Provides_Asset_URL" name="Seller Provides Asset URL" camunda:asyncBefore="true">
+      <bpmn:incoming>Flow_0hktysm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pal2tl</bpmn:outgoing>
+    </bpmn:userTask>
+  </bpmn:process>
+  <bpmn:message id="Message_09e8i18" name="Message-Seller-Is-Notified" />
+  <bpmn:message id="Message_1jfyw3a" name="Message-Order-Fulfilled" />
+  <bpmn:message id="Message_19dcyzb" name="Message-Accept-Reject-Terms-And-Conditions" />
+  <bpmn:message id="Message_034tmjw" name="Message-Asset-Dispatched" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_19yohzd">
+      <bpmndi:BPMNShape id="Participant_1j4tmrl_di" bpmnElement="Topio_Platform" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1540" height="277" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1x8aks8_di" bpmnElement="Flow_1x8aks8">
+        <di:waypoint x="1090" y="280" />
+        <di:waypoint x="1332" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05y46n0_di" bpmnElement="Flow_05y46n0">
+        <di:waypoint x="1375" y="167" />
+        <di:waypoint x="1460" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_141d0wz_di" bpmnElement="Flow_141d0wz">
+        <di:waypoint x="1350" y="262" />
+        <di:waypoint x="1350" y="192" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1225v0t_di" bpmnElement="Flow_1225v0t">
+        <di:waypoint x="1240" y="167" />
+        <di:waypoint x="1325" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0aw4mgq_di" bpmnElement="Flow_0aw4mgq">
+        <di:waypoint x="1560" y="167" />
+        <di:waypoint x="1632" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_000dray_di" bpmnElement="Flow_000dray">
+        <di:waypoint x="1040" y="192" />
+        <di:waypoint x="1040" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1048" y="213" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xpu88d_di" bpmnElement="Flow_0xpu88d">
+        <di:waypoint x="1065" y="167" />
+        <di:waypoint x="1140" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1093" y="149" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a9kqpm_di" bpmnElement="Flow_1a9kqpm">
+        <di:waypoint x="248" y="167" />
+        <di:waypoint x="290" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1670xmr_di" bpmnElement="Flow_1670xmr">
+        <di:waypoint x="390" y="167" />
+        <di:waypoint x="435" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rkq1dv_di" bpmnElement="Flow_0rkq1dv">
+        <di:waypoint x="460" y="192" />
+        <di:waypoint x="460" y="280" />
+        <di:waypoint x="532" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13q94e2_di" bpmnElement="Flow_13q94e2">
+        <di:waypoint x="568" y="280" />
+        <di:waypoint x="610" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09jonrg_di" bpmnElement="Flow_09jonrg">
+        <di:waypoint x="568" y="167" />
+        <di:waypoint x="635" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mlwr7l_di" bpmnElement="Flow_1mlwr7l">
+        <di:waypoint x="485" y="167" />
+        <di:waypoint x="532" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1djxrmn_di" bpmnElement="TNC_Yes">
+        <di:waypoint x="685" y="167" />
+        <di:waypoint x="760" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="693" y="143" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1sc288m_di" bpmnElement="TNC_No">
+        <di:waypoint x="660" y="192" />
+        <di:waypoint x="660" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="673" y="206" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cubqjj_di" bpmnElement="Flow_0cubqjj">
+        <di:waypoint x="710" y="280" />
+        <di:waypoint x="760" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12zaepb_di" bpmnElement="Flow_12zaepb">
+        <di:waypoint x="860" y="167" />
+        <di:waypoint x="922" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04gerr7_di" bpmnElement="Flow_04gerr7">
+        <di:waypoint x="860" y="280" />
+        <di:waypoint x="922" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04w1u7q_di" bpmnElement="Flow_04w1u7q">
+        <di:waypoint x="958" y="167" />
+        <di:waypoint x="1015" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="Cart_Ready">
+        <dc:Bounds x="212" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="203" y="192" width="57" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1viuckq_di" bpmnElement="Create_Order">
+        <dc:Bounds x="290" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_18e8vmo_di" bpmnElement="Gateway_1">
+        <dc:Bounds x="435" y="142" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11q5gwk_di" bpmnElement="Wait_XX_Hours">
+        <dc:Bounds x="532" y="262" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="514" y="305" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0g06ub5_di" bpmnElement="Order_Cancelled">
+        <dc:Bounds x="922" y="262" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="900" y="305" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0vri7u0_di" bpmnElement="TC_Userss_Response">
+        <dc:Bounds x="532" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="519" y="192" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1n9e941_di" bpmnElement="Accepted" isMarkerVisible="true">
+        <dc:Bounds x="635" y="142" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="634" y="112" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0reub4j_di" bpmnElement="Cancel_Order">
+        <dc:Bounds x="610" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0v47qdu_di" bpmnElement="Email_User_Order_Confirmed">
+        <dc:Bounds x="760" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gktsh6_di" bpmnElement="Email_User_Order_Cancelled">
+        <dc:Bounds x="760" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_19fq1pu_di" bpmnElement="Event_0fzli41">
+        <dc:Bounds x="922" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="913" y="192" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_07vpfkv_di" bpmnElement="Asset_To_Be_Delivered_By_Platform" isMarkerVisible="true">
+        <dc:Bounds x="1015" y="142" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1008" y="92" width="63" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ghco5n_di" bpmnElement="Notify_Seller">
+        <dc:Bounds x="990" y="240" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0oeaeq4_di" bpmnElement="Email_User_Purchase_Receipt">
+        <dc:Bounds x="1140" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_08h0o54_di" bpmnElement="Order_Fulfilled_Catch">
+        <dc:Bounds x="1332" y="262" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1377.5" y="273" width="69" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_053uep9_di" bpmnElement="Complete_Order">
+        <dc:Bounds x="1460" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0vsgcxg_di" bpmnElement="Gateway_0vsgcxg" isMarkerVisible="true">
+        <dc:Bounds x="1325" y="142" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1l6gozr_di" bpmnElement="Order_Completed">
+        <dc:Bounds x="1632" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1608" y="192" width="85" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Participant_07oooz9_di" bpmnElement="External_Delivery" isHorizontal="true">
+        <dc:Bounds x="930" y="380" width="1670" height="270" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1244w3z_di" bpmnElement="Flow_1244w3z">
+        <di:waypoint x="1480" y="580" />
+        <di:waypoint x="1540" y="580" />
+        <di:waypoint x="1540" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1dx5kmf_di" bpmnElement="Flow_1dx5kmf">
+        <di:waypoint x="1738" y="580" />
+        <di:waypoint x="1850" y="580" />
+        <di:waypoint x="1850" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sj5hyr_di" bpmnElement="Flow_0sj5hyr">
+        <di:waypoint x="1738" y="470" />
+        <di:waypoint x="1800" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m17fx0_di" bpmnElement="Flow_1m17fx0">
+        <di:waypoint x="1620" y="495" />
+        <di:waypoint x="1620" y="580" />
+        <di:waypoint x="1702" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1w2mnd7_di" bpmnElement="Flow_1w2mnd7">
+        <di:waypoint x="1645" y="470" />
+        <di:waypoint x="1702" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ig885l_di" bpmnElement="Flow_1ig885l">
+        <di:waypoint x="2190" y="470" />
+        <di:waypoint x="2240" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02dd2os_di" bpmnElement="Flow_02dd2os">
+        <di:waypoint x="2340" y="470" />
+        <di:waypoint x="2380" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ohkuc4_di" bpmnElement="Flow_0ohkuc4">
+        <di:waypoint x="2480" y="470" />
+        <di:waypoint x="2532" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1s2s4sw_di" bpmnElement="Flow_1s2s4sw">
+        <di:waypoint x="2050" y="470" />
+        <di:waypoint x="2090" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_193l7w6_di" bpmnElement="Flow_193l7w6">
+        <di:waypoint x="1900" y="470" />
+        <di:waypoint x="1950" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_012p11y_di" bpmnElement="Flow_012p11y">
+        <di:waypoint x="1330" y="580" />
+        <di:waypoint x="1380" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0366wrz_di" bpmnElement="Flow_0366wrz">
+        <di:waypoint x="1198" y="580" />
+        <di:waypoint x="1230" y="580" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_077pv1a_di" bpmnElement="Flow_077pv1a">
+        <di:waypoint x="1130" y="495" />
+        <di:waypoint x="1130" y="580" />
+        <di:waypoint x="1162" y="580" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1109" y="523" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xwj9w1_di" bpmnElement="Flow_1xwj9w1">
+        <di:waypoint x="1480" y="470" />
+        <di:waypoint x="1515" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18a5kgk_di" bpmnElement="Flow_18a5kgk">
+        <di:waypoint x="1565" y="470" />
+        <di:waypoint x="1595" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hktysm_di" bpmnElement="Flow_0hktysm">
+        <di:waypoint x="1155" y="470" />
+        <di:waypoint x="1230" y="470" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1161" y="452" width="31" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19k3ssp_di" bpmnElement="Flow_19k3ssp">
+        <di:waypoint x="1058" y="470" />
+        <di:waypoint x="1105" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pal2tl_di" bpmnElement="Flow_0pal2tl">
+        <di:waypoint x="1330" y="470" />
+        <di:waypoint x="1380" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0ucl6li_di" bpmnElement="Seller_Notified">
+        <dc:Bounds x="1022" y="452" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1006" y="495" width="69" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0r59y8f_di" bpmnElement="Event_03lmvz7">
+        <dc:Bounds x="2532" y="452" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01a2jvb_di" bpmnElement="Order_Fulfilled_Throw">
+        <dc:Bounds x="2380" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_15v7t8b_di" bpmnElement="Email_Seller_Payment_Transferred">
+        <dc:Bounds x="2090" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_00xnftq_di" bpmnElement="Delivery_Confirmed_By_User">
+        <dc:Bounds x="1702" y="452" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1686" y="495" width="68" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0w7nuph_di" bpmnElement="Wait_XX_Hours_2">
+        <dc:Bounds x="1702" y="562" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1687" y="605" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05d2krb_di" bpmnElement="Email_User_Purchase_Receipt_2">
+        <dc:Bounds x="1800" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0lx8s1b_di" bpmnElement="Generate_Taxation_Document">
+        <dc:Bounds x="2240" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tr23lt_di" bpmnElement="Transfer_Payment_To_Seller">
+        <dc:Bounds x="1950" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1o77nv9_di" bpmnElement="Gateway_1o77nv9" isMarkerVisible="true">
+        <dc:Bounds x="1515" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0eiqmxy_di" bpmnElement="Delivery_Means" isMarkerVisible="true">
+        <dc:Bounds x="1105" y="445" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1091" y="421" width="77" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0y2ked2_di" bpmnElement="Asset_Dispatched">
+        <dc:Bounds x="1162" y="562" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1137" y="605" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ityspu_di" bpmnElement="Notify_User_Asset_Dispatched">
+        <dc:Bounds x="1230" y="540" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0pxcbrj_di" bpmnElement="Email_User_Asset_Dispatched">
+        <dc:Bounds x="1380" y="540" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0j71l50_di" bpmnElement="Notify_User_Asset_Available">
+        <dc:Bounds x="1380" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0x2y5cg_di" bpmnElement="Gateway_18opz2z">
+        <dc:Bounds x="1595" y="445" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ffprcz_di" bpmnElement="Seller_Provides_Asset_URL">
+        <dc:Bounds x="1230" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0hfyyba_di" bpmnElement="Flow_0hfyyba">
+        <di:waypoint x="1040" y="320" />
+        <di:waypoint x="1040" y="452" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0w62erf_di" bpmnElement="Flow_0w62erf">
+        <di:waypoint x="2430" y="430" />
+        <di:waypoint x="2430" y="330" />
+        <di:waypoint x="1350" y="330" />
+        <di:waypoint x="1350" y="298" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
