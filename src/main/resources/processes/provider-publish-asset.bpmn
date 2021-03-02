@@ -8,7 +8,14 @@
       <bpmn:incoming>SequenceFlow_1yj76t1</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1ye7rh0" sourceRef="event-start" targetRef="task-automated-metadata" />
-    <bpmn:serviceTask id="task-ingest" name="Ingest" camunda:asyncBefore="true" camunda:type="external" camunda:topic="ingestDraft">
+    <bpmn:serviceTask id="task-ingest" name="Ingest" camunda:asyncBefore="true" camunda:type="external" camunda:topic="ingest">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="publisherKey">${publisherKey}</camunda:inputParameter>
+          <camunda:inputParameter name="assetKey">${draftKey}</camunda:inputParameter>
+          <camunda:inputParameter name="published">True</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0hr87d8</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_146geii</bpmn:outgoing>
     </bpmn:serviceTask>
