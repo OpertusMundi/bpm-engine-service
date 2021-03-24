@@ -43,13 +43,13 @@
     <bpmn:sequenceFlow id="SequenceFlow_0vmqkco" name="Yes" sourceRef="ExclusiveGateway_0zmlvlo" targetRef="ExclusiveGateway_06nstt7">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${providerAccept==true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1yj76t1" sourceRef="Task_0b5thn3" targetRef="Event_0rfddlv" />
+    <bpmn:sequenceFlow id="SequenceFlow_1yj76t1" sourceRef="task-publish" targetRef="Event_0rfddlv" />
     <bpmn:endEvent id="EndEvent_0am4gfn">
       <bpmn:incoming>SequenceFlow_1u80hzt</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_1pvipm0</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_146geii" sourceRef="task-ingest" targetRef="Task_0b5thn3" />
-    <bpmn:serviceTask id="Task_0b5thn3" name="Publish" camunda:type="external" camunda:topic="publishDraft">
+    <bpmn:sequenceFlow id="SequenceFlow_146geii" sourceRef="task-ingest" targetRef="task-publish" />
+    <bpmn:serviceTask id="task-publish" name="Publish" camunda:type="external" camunda:topic="publishDraft">
       <bpmn:incoming>SequenceFlow_146geii</bpmn:incoming>
       <bpmn:incoming>SequenceFlow_12jrof4</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1yj76t1</bpmn:outgoing>
@@ -76,7 +76,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_0hr87d8" name="Yes" sourceRef="ExclusiveGateway_06nstt7" targetRef="task-ingest">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ingested==true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_12jrof4" name="No" sourceRef="ExclusiveGateway_06nstt7" targetRef="Task_0b5thn3">
+    <bpmn:sequenceFlow id="SequenceFlow_12jrof4" name="No" sourceRef="ExclusiveGateway_06nstt7" targetRef="task-publish">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ingested==false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
@@ -140,7 +140,7 @@
         <di:waypoint x="1330" y="257" />
         <di:waypoint x="1420" y="257" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_12efk3s_di" bpmnElement="Task_0b5thn3">
+      <bpmndi:BPMNShape id="ServiceTask_12efk3s_di" bpmnElement="task-publish">
         <dc:Bounds x="1420" y="217" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_14s06b5_di" bpmnElement="task-automated-metadata">
