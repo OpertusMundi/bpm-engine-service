@@ -1,5 +1,7 @@
 # OpertusMundi BPM Server
 
+[![Build Status](https://ci.dev-1.opertusmundi.eu:9443/api/badges/OpertusMundi/bpm-engine-service/status.svg?ref=refs/heads/master)](https://ci.dev-1.opertusmundi.eu:9443/OpertusMundi/bpm-engine-service)
+
 OpertusMundi Business Process Management Server. This service integrates [Camunda BPM Engine](https://docs.camunda.org/manual/latest/user-guide/spring-boot-integration/) into a Spring Boot Application.
 
 ## Quickstart
