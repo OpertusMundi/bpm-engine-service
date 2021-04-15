@@ -1,0 +1,35 @@
+# vim: syntax=yaml:
+
+version: '3.6'
+services:
+
+  'app':
+    image: 'opertusmundi/bpm-engine-service:${VERSION}'
+    build:
+      context: .
+    volumes:
+    - type: 'bind'
+      source: ./secrets/
+      target: /secrets/
+      read_only: true
+    - type: 'bind'
+      source: ./logs
+      target: /app/logs
+    environment:
+      JAVA_OPTS: '-server -Xmx768m -Xms128m -Djava.security.egd=file:///dev/urandom'
+      DATABASE_HOST: ${DATABASE_HOST:-localhost}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
+      DATABASE_NAME: ${DATABASE_NAME:-opertusmundi}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD_FILE: /secrets/database-password
+      CAMUNDA_ADMIN_USERNAME: ${CAMUNDA_ADMIN_USERNAME}
+      CAMUNDA_ADMIN_PASSWORD_FILE: /secrets/camunda-admin-password
+    ports:
+    - '8000:8000'
+    networks:
+    - 'opertusmundi_network'
+
+networks:
+  opertusmundi_network:
+    external: true
+
