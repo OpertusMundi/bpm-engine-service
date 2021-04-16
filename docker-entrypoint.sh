@@ -1,5 +1,5 @@
 #!/bin/sh
-set -u -e
+set -u -e -o pipefail
 set -x
 
 function _gen_configuration()
