@@ -27,7 +27,9 @@ services:
     ports:
     - '8000:8000'
     networks:
-    - 'opertusmundi_network'
+      opertusmundi_network:
+        aliases:
+        - 'bpm-server'
 
 networks:
   opertusmundi_network:
