@@ -1,24 +1,36 @@
 #!/bin/sh
 set -u -e -o pipefail
-set -x
+
+[[ "${DEBUG:-false}" != "false" || "${XTRACE:-false}" != "false" ]] && set -x
 
 function _gen_configuration()
 {
+    if echo ${DATABASE_URL} | grep -v -q -e '^jdbc:postgresql:[/][/]' ; then
+        echo "DATABASE_URL does not seem like a JDBC PostgreSQL connection string" 1>&2 && exit 1 
+    fi
+    database_url=${DATABASE_URL}
+    database_username=${DATABASE_USERNAME}
+    database_password=$(cat ${DATABASE_PASSWORD_FILE} | tr -d '\n')
+
+    camunda_admin_username=${CAMUNDA_ADMIN_USERNAME:-admin}
+    camunda_admin_password=$(cat ${CAMUNDA_ADMIN_PASSWORD_FILE} | tr -d '\n')
+
     cat <<-EOD
-	spring.datasource.url = jdbc:postgresql://${DATABASE_HOST:-localhost}:${DATABASE_PORT:-5432}/${DATABASE_NAME}
-	spring.datasource.username = ${DATABASE_USERNAME}
-	spring.datasource.password = $(cat ${DATABASE_PASSWORD_FILE} | tr -d '\n')
+	spring.datasource.url = ${database_url}
+	spring.datasource.username = ${database_username}
+	spring.datasource.password = ${database_password}
 	
-	camunda.bpm.admin-user.id = ${CAMUNDA_ADMIN_USERNAME}
-	camunda.bpm.admin-user.password = $(cat ${CAMUNDA_ADMIN_PASSWORD_FILE} | tr -d '\n')
+	camunda.bpm.admin-user.id = ${camunda_admin_username}
+	camunda.bpm.admin-user.password = ${camunda_admin_password}
 	EOD
 }
-
-default_java_opts="-server -Djava.security.egd=file:///dev/urandom -Xms128m"
-java_opts="${JAVA_OPTS:-${default_java_opts}}"
 
 runtime_profile=$(hostname | md5sum | head -c 32)
 _gen_configuration > ./config/application-${runtime_profile}.properties
 
-exec java ${java_opts} -cp "/app/classes:/app/dependency/*" eu.opertusmundi.bpm.server.Application \
-  --spring.profiles.active=production,${runtime_profile}
+# Run
+
+main_class=eu.opertusmundi.bpm.server.Application
+default_java_opts="-server -Djava.security.egd=file:///dev/urandom -Xms128m"
+exec java ${JAVA_OPTS:-${default_java_opts}} -cp "/app/classes:/app/dependency/*" ${main_class} \
+    --spring.profiles.active=production,${runtime_profile}
