@@ -7,6 +7,7 @@ environment:
   DATABASE_HOST: postgres-1
   DATABASE_NAME: opertusmundi-camunda
   DATABASE_USER: opertusmundi
+  CAMUNDA_ADMIN_USERNAME: admin
 
 #
 # Steps
@@ -38,9 +39,21 @@ steps:
   - psql -U postgres -l -A -t
   - psql -U $${DATABASE_USER} -d $${DATABASE_NAME} -A -t -c '\d'
 
-- name: tests
+- name: resolve-deps
   #image: maven:3.6.3-openjdk-8
   image: opertusmundi/spring-boot-builder:1-2.3.4
+  when:
+    event:
+    - push
+  environment: {}
+  volumes:
+  - name: maven-repo
+    path: /root/.m2
+  commands:
+  - mvn -B dependency:resolve
+
+- name: generate-configuration-for-testing
+  image: busybox:1.32
   when:
     event:
     - push
@@ -50,17 +63,42 @@ steps:
     CAMUNDA_ADMIN_PASSWORD:
       from_secret: camunda_admin_password
   commands:
+  # Generate configuration for testing
   - mkdir ./config
+  - config_file=./config/application-testing.properties 
   - >-
     (  echo "spring.datasource.url=jdbc:postgresql://$${DATABASE_HOST}:5432/$${DATABASE_NAME}";
        echo "spring.datasource.username=$${DATABASE_USER}";
        echo "spring.datasource.password=$${DATABASE_PASSWORD}";
        echo
-       echo "camunda.bpm.admin-user.id = admin";
+       echo "camunda.bpm.admin-user.id = $${CAMUNDA_ADMIN_USERNAME}";
        echo "camunda.bpm.admin-user.password = $${CAMUNDA_ADMIN_PASSWORD}";
     ) > ./config/application-testing.properties
-  - mvn dependency:resolve -V -B
+
+- name: tests
+  #image: maven:3.6.3-openjdk-8
+  image: opertusmundi/spring-boot-builder:1-2.3.4
+  when:
+    event:
+    - push
+  volumes:
+  - name: maven-repo
+    path: /root/.m2
+  environment: {}
+  commands:
   - mvn test -B -DenableCiProfile
+
+- name: integration-tests
+  #image: maven:3.6.3-openjdk-8
+  image: opertusmundi/spring-boot-builder:1-2.3.4
+  when:
+    event:
+    - push
+  volumes:
+  - name: maven-repo
+    path: /root/.m2
+  environment: {}
+  commands:
   - mvn verify -B -DenableCiProfile
 
 - name: prepare-tags
@@ -114,4 +152,12 @@ services:
   environment:
     POSTGRES_PASSWORD:
       from_secret: database_postgres_password
+
+#
+# Volumes
+#
+
+volumes:
+- name: maven-repo
+  temp: {}
 
