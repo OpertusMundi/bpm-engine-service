@@ -73,7 +73,7 @@ steps:
        echo
        echo "camunda.bpm.admin-user.id = $${CAMUNDA_ADMIN_USERNAME}";
        echo "camunda.bpm.admin-user.password = $${CAMUNDA_ADMIN_PASSWORD}";
-    ) > ./config/application-testing.properties
+    ) | tee $${config_file}
 
 - name: tests
   #image: maven:3.6.3-openjdk-8
@@ -123,7 +123,7 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    repo: opertusmundi/bpm-engine-service
+    repo: opertusmundi/bpm-engine
     mirror: http://registry-mirror:5000
 
 - name: publish-image-2
@@ -137,7 +137,7 @@ steps:
       from_secret: registry_username
     password:
       from_secret: registry_password
-    repo: registry-dev-1-opertusmundi:30474/opertusmundi/bpm-engine-service
+    repo: registry-dev-1-opertusmundi:30474/opertusmundi/bpm-engine
     mirror: http://registry-mirror:5000
     registry: registry-dev-1-opertusmundi:30474
 
