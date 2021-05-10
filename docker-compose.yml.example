@@ -4,7 +4,7 @@ version: '3.6'
 services:
 
   'app':
-    image: 'opertusmundi/bpm-engine-service:${VERSION}'
+    image: 'opertusmundi/bpm-engine:${VERSION}'
     build:
       context: .
     volumes:

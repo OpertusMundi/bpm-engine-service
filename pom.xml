@@ -26,6 +26,7 @@
         <dependency.locations.enabled>false</dependency.locations.enabled>
         <java.version>1.8</java.version>
         <postgresql.version>42.2.19</postgresql.version>
+        <git-commit-id.skip>false</git-commit-id.skip>
     </properties>
 
     <profiles>
@@ -36,6 +37,9 @@
                     <name>enableCiProfile</name>
                 </property>
             </activation>
+            <properties>
+               <git-commit-id.skip>true</git-commit-id.skip>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -69,6 +73,9 @@
                     <name>enableDockerBuildProfile</name>
                 </property>
             </activation>
+            <properties>
+               <git-commit-id.skip>true</git-commit-id.skip>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -152,7 +159,12 @@
 			<artifactId>spring-boot-properties-migrator</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
+	   
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -231,6 +243,7 @@
 					</execution>
 				</executions>
 				<configuration>
+                    <skip>${git-commit-id.skip}</skip>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
 					<includeOnlyProperties>
