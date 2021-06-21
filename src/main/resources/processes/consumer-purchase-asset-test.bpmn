@@ -2,9 +2,8 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
   <bpmn:process id="workflow-process-payin" name="Process PayIn" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="event-start">
-      <bpmn:outgoing>SequenceFlow_0q4x6rf</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_06dkri2</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0q4x6rf" sourceRef="event-start" targetRef="task-get-pay-in-status" />
     <bpmn:serviceTask id="task-update-consumer-assets" name="Update Consumer&#10;Assets&#10;" camunda:type="external" camunda:topic="updateConsumerAssets">
       <bpmn:incoming>SequenceFlow_1tpeqc2</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1xvniql</bpmn:outgoing>
@@ -14,45 +13,51 @@
       <bpmn:incoming>SequenceFlow_1ifqpkz</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1xvniql" sourceRef="task-update-consumer-assets" targetRef="EndEvent_0wly3a7" />
-    <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" sourceRef="check-payin-status-from-message" targetRef="task-update-consumer-assets">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="task-get-pay-in-status" name="Query PayIn&#10;Status&#10;" camunda:type="external" camunda:topic="queryPayInStatus">
+    <bpmn:serviceTask id="task-get-update-payin-status" name="Update PayIn&#10;" camunda:type="external" camunda:topic="updatePayInStatus">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="payInStatusVariableName">payInStatus</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
-      <bpmn:incoming>SequenceFlow_0q4x6rf</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_139tvfc</bpmn:outgoing>
+      <bpmn:incoming>SequenceFlow_1vpa6hw</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0a66w8u</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1lvmxbc</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1bq7q4w</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_139tvfc" sourceRef="task-get-pay-in-status" targetRef="check-payin-status-from-database" />
-    <bpmn:intermediateCatchEvent id="event-payin-updated" name="PayIn status &#10;updated&#10;">
-      <bpmn:incoming>SequenceFlow_0d4vwuf</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0dhwrel</bpmn:outgoing>
+    <bpmn:intermediateCatchEvent id="event-payin-updated" name="Waite for PayIn status update&#10;">
+      <bpmn:incoming>SequenceFlow_0el1opp</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0a66w8u</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0s35hx2" messageRef="Message_1njwliz" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_0dhwrel" sourceRef="event-payin-updated" targetRef="check-payin-status-from-message" />
-    <bpmn:exclusiveGateway id="check-payin-status-from-database" name="Query Status&#10;from Database&#10;&#10;">
-      <bpmn:incoming>SequenceFlow_139tvfc</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0d4vwuf</bpmn:outgoing>
-      <bpmn:outgoing>SequenceFlow_1snf1w9</bpmn:outgoing>
+    <bpmn:sequenceFlow id="SequenceFlow_06dkri2" sourceRef="event-start" targetRef="check-payin-status-on-startup" />
+    <bpmn:exclusiveGateway id="check-payin-status-on-startup" name="Check PayIn Status on Startup&#10;">
+      <bpmn:incoming>SequenceFlow_06dkri2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0el1opp</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1lvmxbc</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1vpa6hw</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_0d4vwuf" sourceRef="check-payin-status-from-database" targetRef="event-payin-updated">
+    <bpmn:sequenceFlow id="SequenceFlow_0el1opp" name="Created" sourceRef="check-payin-status-on-startup" targetRef="event-payin-updated">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='CREATED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1snf1w9" sourceRef="check-payin-status-from-database" targetRef="check-payin-status-from-message">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus!='CREATED'}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="SequenceFlow_1lvmxbc" name="Failure&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-get-update-payin-status">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='FAILED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1vpa6hw" name="Success&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-get-update-payin-status">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0a66w8u" sourceRef="event-payin-updated" targetRef="task-get-update-payin-status" />
     <bpmn:exclusiveGateway id="check-payin-status-from-message" name="Query Status&#10;&#10;">
-      <bpmn:incoming>SequenceFlow_1snf1w9</bpmn:incoming>
-      <bpmn:incoming>SequenceFlow_0dhwrel</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_1tpeqc2</bpmn:outgoing>
+      <bpmn:incoming>SequenceFlow_1bq7q4w</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ifqpkz</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1tpeqc2</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_1ifqpkz" sourceRef="check-payin-status-from-message" targetRef="EndEvent_0wly3a7">
+    <bpmn:sequenceFlow id="SequenceFlow_1ifqpkz" name="Failure&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="EndEvent_0wly3a7">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus!='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" name="Success&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="task-update-consumer-assets">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1bq7q4w" sourceRef="task-get-update-payin-status" targetRef="check-payin-status-from-message" />
   </bpmn:process>
   <bpmn:message id="Message_1njwliz" name="payin-updated-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -60,56 +65,63 @@
       <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
         <dc:Bounds x="152" y="172" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0q4x6rf_di" bpmnElement="SequenceFlow_0q4x6rf">
-        <di:waypoint x="188" y="190" />
-        <di:waypoint x="270" y="190" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1w5f0v4_di" bpmnElement="task-update-consumer-assets">
-        <dc:Bounds x="850" y="150" width="100" height="80" />
+        <dc:Bounds x="870" y="150" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="EndEvent_0wly3a7">
-        <dc:Bounds x="1022" y="172" width="36" height="36" />
+        <dc:Bounds x="1072" y="172" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1xvniql_di" bpmnElement="SequenceFlow_1xvniql">
-        <di:waypoint x="950" y="190" />
-        <di:waypoint x="1022" y="190" />
+        <di:waypoint x="970" y="190" />
+        <di:waypoint x="1072" y="190" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_1tpeqc2_di" bpmnElement="SequenceFlow_1tpeqc2">
-        <di:waypoint x="785" y="190" />
-        <di:waypoint x="850" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-get-pay-in-status">
-        <dc:Bounds x="270" y="150" width="100" height="80" />
+      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-get-update-payin-status">
+        <dc:Bounds x="560" y="150" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_139tvfc_di" bpmnElement="SequenceFlow_139tvfc">
-        <di:waypoint x="370" y="190" />
-        <di:waypoint x="455" y="190" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="IntermediateCatchEvent_1ny355w_di" bpmnElement="event-payin-updated">
-        <dc:Bounds x="572" y="172" width="36" height="36" />
+        <dc:Bounds x="432" y="172" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="560" y="215" width="62" height="40" />
+          <dc:Bounds x="413" y="122" width="75" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0dhwrel_di" bpmnElement="SequenceFlow_0dhwrel">
-        <di:waypoint x="608" y="190" />
-        <di:waypoint x="735" y="190" />
+      <bpmndi:BPMNEdge id="SequenceFlow_06dkri2_di" bpmnElement="SequenceFlow_06dkri2">
+        <di:waypoint x="188" y="190" />
+        <di:waypoint x="275" y="190" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ExclusiveGateway_0m2iev7_di" bpmnElement="check-payin-status-from-database" isMarkerVisible="true">
-        <dc:Bounds x="455" y="165" width="50" height="50" />
+      <bpmndi:BPMNShape id="ExclusiveGateway_0zhxp6m_di" bpmnElement="check-payin-status-on-startup" isMarkerVisible="true">
+        <dc:Bounds x="275" y="165" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="443" y="132.5" width="73" height="53" />
+          <dc:Bounds x="197" y="213" width="85" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0d4vwuf_di" bpmnElement="SequenceFlow_0d4vwuf">
-        <di:waypoint x="505" y="190" />
-        <di:waypoint x="572" y="190" />
+      <bpmndi:BPMNEdge id="SequenceFlow_0el1opp_di" bpmnElement="SequenceFlow_0el1opp">
+        <di:waypoint x="325" y="190" />
+        <di:waypoint x="432" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="350" y="172" width="40" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_1snf1w9_di" bpmnElement="SequenceFlow_1snf1w9">
-        <di:waypoint x="480" y="215" />
-        <di:waypoint x="480" y="310" />
-        <di:waypoint x="760" y="310" />
-        <di:waypoint x="760" y="215" />
+      <bpmndi:BPMNEdge id="SequenceFlow_1lvmxbc_di" bpmnElement="SequenceFlow_1lvmxbc">
+        <di:waypoint x="300" y="215" />
+        <di:waypoint x="300" y="290" />
+        <di:waypoint x="610" y="290" />
+        <di:waypoint x="610" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="353" y="270" width="34" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vpa6hw_di" bpmnElement="SequenceFlow_1vpa6hw">
+        <di:waypoint x="300" y="165" />
+        <di:waypoint x="300" y="80" />
+        <di:waypoint x="610" y="80" />
+        <di:waypoint x="610" y="150" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="348" y="60" width="43" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0a66w8u_di" bpmnElement="SequenceFlow_0a66w8u">
+        <di:waypoint x="468" y="190" />
+        <di:waypoint x="560" y="190" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ExclusiveGateway_1bdn5ty_di" bpmnElement="check-payin-status-from-message" isMarkerVisible="true">
         <dc:Bounds x="735" y="165" width="50" height="50" />
@@ -120,8 +132,22 @@
       <bpmndi:BPMNEdge id="SequenceFlow_1ifqpkz_di" bpmnElement="SequenceFlow_1ifqpkz">
         <di:waypoint x="760" y="165" />
         <di:waypoint x="760" y="80" />
-        <di:waypoint x="1040" y="80" />
-        <di:waypoint x="1040" y="170" />
+        <di:waypoint x="1090" y="80" />
+        <di:waypoint x="1090" y="172" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="811" y="60" width="34" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1tpeqc2_di" bpmnElement="SequenceFlow_1tpeqc2">
+        <di:waypoint x="785" y="190" />
+        <di:waypoint x="870" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="806" y="172" width="43" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1bq7q4w_di" bpmnElement="SequenceFlow_1bq7q4w">
+        <di:waypoint x="660" y="190" />
+        <di:waypoint x="735" y="190" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
