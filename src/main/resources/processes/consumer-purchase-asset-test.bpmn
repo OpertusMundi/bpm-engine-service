@@ -13,7 +13,7 @@
       <bpmn:incoming>SequenceFlow_1ifqpkz</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1xvniql" sourceRef="task-update-consumer-assets" targetRef="EndEvent_0wly3a7" />
-    <bpmn:serviceTask id="task-get-update-payin-status" name="Update PayIn&#10;" camunda:type="external" camunda:topic="updatePayInStatus">
+    <bpmn:serviceTask id="task-update-payin-status" name="Update PayIn&#10;" camunda:type="external" camunda:topic="updatePayInStatus">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="payInStatusVariableName">payInStatus</camunda:inputParameter>
@@ -24,7 +24,7 @@
       <bpmn:incoming>SequenceFlow_1lvmxbc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1bq7q4w</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:intermediateCatchEvent id="event-payin-updated" name="Waite for PayIn status update&#10;">
+    <bpmn:intermediateCatchEvent id="event-payin-updated" name="Wait for PayIn status update&#10;">
       <bpmn:incoming>SequenceFlow_0el1opp</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0a66w8u</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_0s35hx2" messageRef="Message_1njwliz" />
@@ -39,13 +39,13 @@
     <bpmn:sequenceFlow id="SequenceFlow_0el1opp" name="Created" sourceRef="check-payin-status-on-startup" targetRef="event-payin-updated">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='CREATED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1lvmxbc" name="Failure&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-get-update-payin-status">
+    <bpmn:sequenceFlow id="SequenceFlow_1lvmxbc" name="Failure&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-update-payin-status">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='FAILED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1vpa6hw" name="Success&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-get-update-payin-status">
+    <bpmn:sequenceFlow id="SequenceFlow_1vpa6hw" name="Success&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-update-payin-status">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_0a66w8u" sourceRef="event-payin-updated" targetRef="task-get-update-payin-status" />
+    <bpmn:sequenceFlow id="SequenceFlow_0a66w8u" sourceRef="event-payin-updated" targetRef="task-update-payin-status" />
     <bpmn:exclusiveGateway id="check-payin-status-from-message" name="Query Status&#10;&#10;">
       <bpmn:incoming>SequenceFlow_1bq7q4w</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ifqpkz</bpmn:outgoing>
@@ -57,7 +57,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" name="Success&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="task-update-consumer-assets">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1bq7q4w" sourceRef="task-get-update-payin-status" targetRef="check-payin-status-from-message" />
+    <bpmn:sequenceFlow id="SequenceFlow_1bq7q4w" sourceRef="task-update-payin-status" targetRef="check-payin-status-from-message" />
   </bpmn:process>
   <bpmn:message id="Message_1njwliz" name="payin-updated-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -75,13 +75,13 @@
         <di:waypoint x="970" y="190" />
         <di:waypoint x="1072" y="190" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-get-update-payin-status">
+      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-update-payin-status">
         <dc:Bounds x="560" y="150" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateCatchEvent_1ny355w_di" bpmnElement="event-payin-updated">
         <dc:Bounds x="432" y="172" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="413" y="122" width="75" height="40" />
+          <dc:Bounds x="416" y="122" width="69" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_06dkri2_di" bpmnElement="SequenceFlow_06dkri2">
