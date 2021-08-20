@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="workflow-provider-remove-asset" name="Provider Unpublish Asset" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="event-start">
+      <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="Event_0rfddlv">
+      <bpmn:incoming>SequenceFlow_04hf4hf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1ye7rh0" sourceRef="event-start" targetRef="task-remove-asset" />
+    <bpmn:serviceTask id="task-remove-asset" name="Remove Asset &#10;From Catalogue&#10;" camunda:type="external" camunda:topic="unpublishAsset">
+      <bpmn:incoming>Flow_1ye7rh0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0jaeuon</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="send-notification" name="Send Publisher&#10;Notification&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationRecipientType">PROVIDER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${publisherKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">CATALOGUE_ASSET_UNPUBLISHED</camunda:inputParameter>
+          <camunda:inputParameter name="assetId">${assetId}</camunda:inputParameter>
+          <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
+          <camunda:inputParameter name="assetVersion">${assetVersion}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0jaeuon</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_04hf4hf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0jaeuon" sourceRef="task-remove-asset" targetRef="send-notification" />
+    <bpmn:sequenceFlow id="SequenceFlow_04hf4hf" sourceRef="send-notification" targetRef="Event_0rfddlv" />
+  </bpmn:process>
+  <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-provider-remove-asset">
+      <bpmndi:BPMNEdge id="Flow_1ye7rh0_di" bpmnElement="Flow_1ye7rh0">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="260" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="event-start">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="Event_0rfddlv">
+        <dc:Bounds x="722" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_14s06b5_di" bpmnElement="task-remove-asset">
+        <dc:Bounds x="260" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0srm50r_di" bpmnElement="send-notification">
+        <dc:Bounds x="500" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0jaeuon_di" bpmnElement="SequenceFlow_0jaeuon">
+        <di:waypoint x="360" y="120" />
+        <di:waypoint x="500" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_04hf4hf_di" bpmnElement="SequenceFlow_04hf4hf">
+        <di:waypoint x="600" y="120" />
+        <di:waypoint x="722" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
