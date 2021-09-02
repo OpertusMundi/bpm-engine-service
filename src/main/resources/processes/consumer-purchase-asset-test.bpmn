@@ -5,7 +5,8 @@
       <bpmn:outgoing>SequenceFlow_06dkri2</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="task-update-consumer-assets" name="Update Consumer&#10;Assets&#10;" camunda:type="external" camunda:topic="updateConsumerAssets">
-      <bpmn:incoming>SequenceFlow_1tpeqc2</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1ypgur5</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1jvg7as</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1xvniql</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_0wly3a7">
@@ -54,26 +55,51 @@
     <bpmn:sequenceFlow id="SequenceFlow_1ifqpkz" name="Failure&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="EndEvent_0wly3a7">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus!='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" name="Success&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="task-update-consumer-assets">
+    <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" name="Success&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="check-delivery-method">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1bq7q4w" sourceRef="task-update-payin-status" targetRef="check-payin-status-from-message" />
+    <bpmn:exclusiveGateway id="check-delivery-method" name="Check Delivery Method&#10;">
+      <bpmn:incoming>SequenceFlow_1tpeqc2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1ypgur5</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1h6tnxe</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1ypgur5" name="Digital Platform" sourceRef="check-delivery-method" targetRef="task-update-consumer-assets">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deliveryMethod=='DIGITAL_PLATFORM'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:intermediateCatchEvent id="event-provider-send-order" name="Wait for provider shipping confiration&#10;">
+      <bpmn:incoming>SequenceFlow_1h6tnxe</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1twivjk</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1ycwk76" messageRef="Message_0721zq1" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="event-consumer-delivery" name="Wait for consumer delivery confirmation">
+      <bpmn:incoming>SequenceFlow_1twivjk</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1jvg7as</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_08hz9uf" messageRef="Message_1q2gpsr" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1h6tnxe" name="Provider Delivery" sourceRef="check-delivery-method" targetRef="event-provider-send-order">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deliveryMethod!='DIGITAL_PLATFORM'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1twivjk" sourceRef="event-provider-send-order" targetRef="event-consumer-delivery" />
+    <bpmn:sequenceFlow id="SequenceFlow_1jvg7as" sourceRef="event-consumer-delivery" targetRef="task-update-consumer-assets" />
   </bpmn:process>
   <bpmn:message id="Message_1njwliz" name="payin-updated-message" />
+  <bpmn:message id="Message_0721zq1" name="provider-send-order-message" />
+  <bpmn:message id="Message_1q2gpsr" name="consumer-order-received-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-process-payin">
       <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
         <dc:Bounds x="152" y="172" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1w5f0v4_di" bpmnElement="task-update-consumer-assets">
-        <dc:Bounds x="870" y="150" width="100" height="80" />
+        <dc:Bounds x="1250" y="150" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="EndEvent_0wly3a7">
-        <dc:Bounds x="1072" y="172" width="36" height="36" />
+        <dc:Bounds x="1482" y="172" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1xvniql_di" bpmnElement="SequenceFlow_1xvniql">
-        <di:waypoint x="970" y="190" />
-        <di:waypoint x="1072" y="190" />
+        <di:waypoint x="1350" y="190" />
+        <di:waypoint x="1482" y="190" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-update-payin-status">
         <dc:Bounds x="560" y="150" width="100" height="80" />
@@ -126,28 +152,71 @@
       <bpmndi:BPMNShape id="ExclusiveGateway_1bdn5ty_di" bpmnElement="check-payin-status-from-message" isMarkerVisible="true">
         <dc:Bounds x="735" y="165" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="677" y="160" width="65" height="40" />
+          <dc:Bounds x="727" y="230" width="65" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1ifqpkz_di" bpmnElement="SequenceFlow_1ifqpkz">
         <di:waypoint x="760" y="165" />
         <di:waypoint x="760" y="80" />
-        <di:waypoint x="1090" y="80" />
-        <di:waypoint x="1090" y="172" />
+        <di:waypoint x="1500" y="80" />
+        <di:waypoint x="1500" y="172" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="811" y="60" width="34" height="40" />
+          <dc:Bounds x="808" y="60" width="34" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1tpeqc2_di" bpmnElement="SequenceFlow_1tpeqc2">
         <di:waypoint x="785" y="190" />
-        <di:waypoint x="870" y="190" />
+        <di:waypoint x="905" y="190" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="806" y="172" width="43" height="40" />
+          <dc:Bounds x="798" y="159" width="43" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1bq7q4w_di" bpmnElement="SequenceFlow_1bq7q4w">
         <di:waypoint x="660" y="190" />
         <di:waypoint x="735" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1a6btgb_di" bpmnElement="check-delivery-method" isMarkerVisible="true">
+        <dc:Bounds x="905" y="165" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="892" y="110" width="75" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ypgur5_di" bpmnElement="SequenceFlow_1ypgur5">
+        <di:waypoint x="955" y="190" />
+        <di:waypoint x="1250" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1068" y="172" width="75" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_14ltt4w_di" bpmnElement="event-provider-send-order">
+        <dc:Bounds x="982" y="312" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="960" y="262" width="81" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0njxtr1_di" bpmnElement="event-consumer-delivery">
+        <dc:Bounds x="1091" y="312" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1065" y="363" width="90" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1h6tnxe_di" bpmnElement="SequenceFlow_1h6tnxe">
+        <di:waypoint x="930" y="215" />
+        <di:waypoint x="930" y="330" />
+        <di:waypoint x="982" y="330" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="837" y="270" width="85" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1twivjk_di" bpmnElement="SequenceFlow_1twivjk">
+        <di:waypoint x="1018" y="330" />
+        <di:waypoint x="1091" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1jvg7as_di" bpmnElement="SequenceFlow_1jvg7as">
+        <di:waypoint x="1127" y="330" />
+        <di:waypoint x="1170" y="330" />
+        <di:waypoint x="1170" y="190" />
+        <di:waypoint x="1250" y="190" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
