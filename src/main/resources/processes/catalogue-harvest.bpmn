@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
   <bpmn:process id="workflow-catalogue-harvest" name="Harvest Catalogue" isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_0qwki2f</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_0rfddlv">
-      <bpmn:incoming>SequenceFlow_0j0z1c8</bpmn:incoming>
+      <bpmn:incoming>Flow_0pig2re</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="user_notification_task" name="Send User&#10;Notification&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
       <bpmn:extensionElements>
@@ -24,37 +24,55 @@
       <bpmn:incoming>SequenceFlow_0qwki2f</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1jvxpj5</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0j0z1c8" sourceRef="user_notification_task" targetRef="Event_0rfddlv" />
+    <bpmn:sequenceFlow id="SequenceFlow_0j0z1c8" sourceRef="user_notification_task" targetRef="send_mail_harvesting_completed" />
     <bpmn:sequenceFlow id="SequenceFlow_0qwki2f" sourceRef="event-start" targetRef="harvest_task" />
     <bpmn:sequenceFlow id="SequenceFlow_1jvxpj5" sourceRef="harvest_task" targetRef="user_notification_task" />
+    <bpmn:serviceTask id="send_mail_harvesting_completed" name="Send Mail Harvesting Completed" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailType">CATALOGUE_HARVEST_COMPLETED</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0j0z1c8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pig2re</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0pig2re" sourceRef="send_mail_harvesting_completed" targetRef="Event_0rfddlv" />
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-catalogue-harvest">
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="event-start">
-        <dc:Bounds x="152" y="99" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="Event_0rfddlv">
-        <dc:Bounds x="732" y="99" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0p3kmm0_di" bpmnElement="user_notification_task">
-        <dc:Bounds x="510" y="77" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_12efk3s_di" bpmnElement="harvest_task">
-        <dc:Bounds x="270" y="77" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0j0z1c8_di" bpmnElement="SequenceFlow_0j0z1c8">
-        <di:waypoint x="610" y="117" />
-        <di:waypoint x="732" y="117" />
+      <bpmndi:BPMNEdge id="Flow_0pig2re_di" bpmnElement="Flow_0pig2re">
+        <di:waypoint x="730" y="117" />
+        <di:waypoint x="812" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1jvxpj5_di" bpmnElement="SequenceFlow_1jvxpj5">
+        <di:waypoint x="370" y="117" />
+        <di:waypoint x="450" y="117" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0qwki2f_di" bpmnElement="SequenceFlow_0qwki2f">
         <di:waypoint x="188" y="117" />
         <di:waypoint x="270" y="117" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_1jvxpj5_di" bpmnElement="SequenceFlow_1jvxpj5">
-        <di:waypoint x="370" y="117" />
-        <di:waypoint x="510" y="117" />
+      <bpmndi:BPMNEdge id="SequenceFlow_0j0z1c8_di" bpmnElement="SequenceFlow_0j0z1c8">
+        <di:waypoint x="550" y="117" />
+        <di:waypoint x="630" y="117" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="event-start">
+        <dc:Bounds x="152" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="Event_0rfddlv">
+        <dc:Bounds x="812" y="99" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0p3kmm0_di" bpmnElement="user_notification_task">
+        <dc:Bounds x="450" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_12efk3s_di" bpmnElement="harvest_task">
+        <dc:Bounds x="270" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tpe8yv_di" bpmnElement="send_mail_harvesting_completed">
+        <dc:Bounds x="630" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
