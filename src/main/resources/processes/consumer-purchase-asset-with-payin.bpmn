@@ -6,7 +6,9 @@
     </bpmn:startEvent>
     <bpmn:serviceTask id="task-update-consumer-assets" name="Update Consumer&#10;Assets&#10;" camunda:type="external" camunda:topic="updateConsumerAssets">
       <bpmn:incoming>SequenceFlow_1jvg7as</bpmn:incoming>
-      <bpmn:incoming>Flow_1t16w7p</bpmn:incoming>
+      <bpmn:incoming>Flow_1iemxxk</bpmn:incoming>
+      <bpmn:incoming>Flow_16nwnc7</bpmn:incoming>
+      <bpmn:incoming>Flow_0aglupt</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1xvniql</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_0wly3a7">
@@ -55,7 +57,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_1ifqpkz" name="Failure&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="EndEvent_0wly3a7">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus!='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" name="Success&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="send_mail_order_confirmed">
+    <bpmn:sequenceFlow id="SequenceFlow_1tpeqc2" name="Success&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="send-mail-order-confirmed">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1bq7q4w" sourceRef="task-update-payin-status" targetRef="check-payin-status-from-message" />
@@ -63,8 +65,9 @@
       <bpmn:incoming>Flow_06n11hc</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ypgur5</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_1h6tnxe</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0mq2f8q</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="SequenceFlow_1ypgur5" name="Digital Platform" sourceRef="check-delivery-method" targetRef="send_notification_downloadable_asset">
+    <bpmn:sequenceFlow id="SequenceFlow_1ypgur5" name="Digital Platform" sourceRef="check-delivery-method" targetRef="send-notification-downloadable-asset">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deliveryMethod=='DIGITAL_PLATFORM'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:intermediateCatchEvent id="event-provider-send-order" name="Wait for provider shipping confiration&#10;">
@@ -77,14 +80,14 @@
       <bpmn:outgoing>SequenceFlow_1jvg7as</bpmn:outgoing>
       <bpmn:messageEventDefinition id="MessageEventDefinition_08hz9uf" messageRef="Message_1q2gpsr" />
     </bpmn:intermediateCatchEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_1h6tnxe" name="Provider Delivery" sourceRef="check-delivery-method" targetRef="event-provider-send-order">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deliveryMethod!='DIGITAL_PLATFORM'}</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="SequenceFlow_1h6tnxe" name="Physical Provider" sourceRef="check-delivery-method" targetRef="event-provider-send-order">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deliveryMethod=='PHYSICAL_PROVIDER'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_1jvg7as" sourceRef="event-consumer-delivery" targetRef="task-update-consumer-assets" />
-    <bpmn:serviceTask id="send_notification_asset_shipped" name="Send&#10;Notification Asset Shipped" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+    <bpmn:serviceTask id="send-notification-asset-shipped" name="Send&#10;Notification Asset Shipped" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="notificationRecipientType">PROVIDER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
           <camunda:inputParameter name="notificationRecipient">${userKey}</camunda:inputParameter>
           <camunda:inputParameter name="notificationType">PHYSICAL_DELIVERY_BY_SUPPLIER</camunda:inputParameter>
           <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
@@ -93,7 +96,7 @@
       <bpmn:incoming>Flow_0ka22mr</bpmn:incoming>
       <bpmn:outgoing>Flow_0vh71xd</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="send_mail_asset_shipped" name="Send Mail Asset Shipped" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+    <bpmn:serviceTask id="send-mail-asset-shipped" name="Send Mail Asset Shipped" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
@@ -103,10 +106,10 @@
       <bpmn:incoming>Flow_0vh71xd</bpmn:incoming>
       <bpmn:outgoing>Flow_0yexdcj</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="send_notification_downloadable_asset" name="Send&#10;Notification Downloadable Asset" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+    <bpmn:serviceTask id="send-notification-downloadable-asset" name="Send&#10;Notification Downloadable Asset" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="notificationRecipientType">PROVIDER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
           <camunda:inputParameter name="notificationRecipient">${userKey}</camunda:inputParameter>
           <camunda:inputParameter name="notificationType">DIGITAL_DELIVERY_BY_PLATFORM</camunda:inputParameter>
           <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
@@ -115,7 +118,7 @@
       <bpmn:incoming>SequenceFlow_1ypgur5</bpmn:incoming>
       <bpmn:outgoing>Flow_0pqzqvx</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="send_mail_downloadable_asset" name="Send Mail Downloadable Asset" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+    <bpmn:serviceTask id="send-mail-downloadable-asset" name="Send Mail Downloadable Asset" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
@@ -123,14 +126,13 @@
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0pqzqvx</bpmn:incoming>
-      <bpmn:outgoing>Flow_1t16w7p</bpmn:outgoing>
+      <bpmn:outgoing>Flow_16nwnc7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_0vh71xd" sourceRef="send_notification_asset_shipped" targetRef="send_mail_asset_shipped" />
-    <bpmn:sequenceFlow id="Flow_0yexdcj" sourceRef="send_mail_asset_shipped" targetRef="event-consumer-delivery" />
-    <bpmn:sequenceFlow id="Flow_0ka22mr" sourceRef="event-provider-send-order" targetRef="send_notification_asset_shipped" />
-    <bpmn:sequenceFlow id="Flow_1t16w7p" sourceRef="send_mail_downloadable_asset" targetRef="task-update-consumer-assets" />
-    <bpmn:sequenceFlow id="Flow_0pqzqvx" sourceRef="send_notification_downloadable_asset" targetRef="send_mail_downloadable_asset" />
-    <bpmn:serviceTask id="send_mail_order_confirmed" name="Send Mail Order Confirmed" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+    <bpmn:sequenceFlow id="Flow_0vh71xd" sourceRef="send-notification-asset-shipped" targetRef="send-mail-asset-shipped" />
+    <bpmn:sequenceFlow id="Flow_0yexdcj" sourceRef="send-mail-asset-shipped" targetRef="event-consumer-delivery" />
+    <bpmn:sequenceFlow id="Flow_0ka22mr" sourceRef="event-provider-send-order" targetRef="send-notification-asset-shipped" />
+    <bpmn:sequenceFlow id="Flow_0pqzqvx" sourceRef="send-notification-downloadable-asset" targetRef="send-mail-downloadable-asset" />
+    <bpmn:serviceTask id="send-mail-order-confirmed" name="Send Mail Order Confirmed" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
@@ -140,175 +142,350 @@
       <bpmn:incoming>SequenceFlow_1tpeqc2</bpmn:incoming>
       <bpmn:outgoing>Flow_06n11hc</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_06n11hc" sourceRef="send_mail_order_confirmed" targetRef="check-delivery-method" />
+    <bpmn:sequenceFlow id="Flow_06n11hc" sourceRef="send-mail-order-confirmed" targetRef="check-delivery-method" />
+    <bpmn:serviceTask id="send-notification-purchase-approved" name="Send&#10;Notification Purchase Approved" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">PURCHASE_APPROVED</camunda:inputParameter>
+          <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_09jopi4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1dz9jl4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="sen-mail-purchase-approved" name="Send Mail Purchase Approved" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailType">CONSUMER_PURCHASE_APPROVED</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1dz9jl4</bpmn:incoming>
+      <bpmn:outgoing>Flow_05c1ch9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1dz9jl4" sourceRef="send-notification-purchase-approved" targetRef="sen-mail-purchase-approved" />
+    <bpmn:sequenceFlow id="Flow_0mq2f8q" name="Digital Provider" sourceRef="check-delivery-method" targetRef="send-mail-purchase-status">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${deliveryMethod=='DIGITAL_PROVIDER'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:intermediateCatchEvent id="Event_0af5j6u" name="Wait for consumer delivery confirmation">
+      <bpmn:incoming>Flow_05c1ch9</bpmn:incoming>
+      <bpmn:outgoing>Flow_1iemxxk</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1kszmr9" messageRef="Message_1q2gpsr" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_05c1ch9" sourceRef="sen-mail-purchase-approved" targetRef="Event_0af5j6u" />
+    <bpmn:sequenceFlow id="Flow_1iemxxk" sourceRef="Event_0af5j6u" targetRef="task-update-consumer-assets" />
+    <bpmn:sequenceFlow id="Flow_16nwnc7" sourceRef="send-mail-downloadable-asset" targetRef="task-update-consumer-assets" />
+    <bpmn:intermediateCatchEvent id="event-provider-approve-order" name="Wait for provider&#39;s approval">
+      <bpmn:incoming>Flow_0psgs31</bpmn:incoming>
+      <bpmn:outgoing>Flow_0bdfwte</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0bicuyz" messageRef="Message_1aze5a7" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="send-mail-purchase-status" name="Send Mail Purchase Status" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailType">CONSUMER_PURCHASE_NOTIFICATION</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0mq2f8q</bpmn:incoming>
+      <bpmn:outgoing>Flow_0psgs31</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0psgs31" sourceRef="send-mail-purchase-status" targetRef="event-provider-approve-order" />
+    <bpmn:exclusiveGateway id="is-purchase-approved" name="Is Purchase Approved?">
+      <bpmn:incoming>Flow_0bdfwte</bpmn:incoming>
+      <bpmn:outgoing>Flow_09jopi4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1x59ngy</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0bdfwte" sourceRef="event-provider-approve-order" targetRef="is-purchase-approved" />
+    <bpmn:sequenceFlow id="Flow_09jopi4" name="Yes" sourceRef="is-purchase-approved" targetRef="send-notification-purchase-approved">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${purchaseApproved==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="send-mail-purchase-rejected" name="Send Mail Purchase Rejected" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailType">CONSUMER_PURCHASE_REJECTION</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1nfq4e0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0aglupt</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="send-notification-purchase-rejected" name="Send&#10;Notification Purchase Rejected" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">PURCHASE_REJECTED
+
+</camunda:inputParameter>
+          <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1x59ngy</bpmn:incoming>
+      <bpmn:outgoing>Flow_1nfq4e0</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1nfq4e0" sourceRef="send-notification-purchase-rejected" targetRef="send-mail-purchase-rejected" />
+    <bpmn:sequenceFlow id="Flow_1x59ngy" name="No" sourceRef="is-purchase-approved" targetRef="send-notification-purchase-rejected">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${purchaseApproved==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0aglupt" sourceRef="send-mail-purchase-rejected" targetRef="task-update-consumer-assets" />
   </bpmn:process>
   <bpmn:message id="Message_1njwliz" name="payin-updated-message" />
   <bpmn:message id="Message_0721zq1" name="provider-send-order-message" />
   <bpmn:message id="Message_1q2gpsr" name="consumer-order-received-message" />
+  <bpmn:message id="Message_1aze5a7" name="provide-approve-order-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-process-order-with-payin">
       <bpmndi:BPMNEdge id="Flow_06n11hc_di" bpmnElement="Flow_06n11hc">
-        <di:waypoint x="990" y="190" />
-        <di:waypoint x="1135" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0pqzqvx_di" bpmnElement="Flow_0pqzqvx">
-        <di:waypoint x="1380" y="190" />
-        <di:waypoint x="1450" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1t16w7p_di" bpmnElement="Flow_1t16w7p">
-        <di:waypoint x="1550" y="190" />
-        <di:waypoint x="1690" y="190" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ka22mr_di" bpmnElement="Flow_0ka22mr">
-        <di:waypoint x="1178" y="330" />
-        <di:waypoint x="1280" y="330" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0yexdcj_di" bpmnElement="Flow_0yexdcj">
-        <di:waypoint x="1550" y="330" />
-        <di:waypoint x="1592" y="330" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0vh71xd_di" bpmnElement="Flow_0vh71xd">
-        <di:waypoint x="1380" y="330" />
-        <di:waypoint x="1450" y="330" />
+        <di:waypoint x="990" y="390" />
+        <di:waypoint x="1135" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1jvg7as_di" bpmnElement="SequenceFlow_1jvg7as">
-        <di:waypoint x="1610" y="312" />
-        <di:waypoint x="1610" y="190" />
-        <di:waypoint x="1690" y="190" />
+        <di:waypoint x="1718" y="390" />
+        <di:waypoint x="1770" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1h6tnxe_di" bpmnElement="SequenceFlow_1h6tnxe">
-        <di:waypoint x="1160" y="215" />
-        <di:waypoint x="1160" y="312" />
+        <di:waypoint x="1185" y="390" />
+        <di:waypoint x="1282" y="390" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1067" y="270" width="85" height="14" />
+          <dc:Bounds x="1186" y="372" width="87" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1ypgur5_di" bpmnElement="SequenceFlow_1ypgur5">
-        <di:waypoint x="1185" y="190" />
-        <di:waypoint x="1280" y="190" />
+        <di:waypoint x="1160" y="365" />
+        <di:waypoint x="1160" y="220" />
+        <di:waypoint x="1370" y="220" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1191.9999999999998" y="172" width="75" height="14" />
+          <dc:Bounds x="1122" y="313" width="75" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1bq7q4w_di" bpmnElement="SequenceFlow_1bq7q4w">
-        <di:waypoint x="660" y="190" />
-        <di:waypoint x="705" y="190" />
+        <di:waypoint x="660" y="390" />
+        <di:waypoint x="705" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1tpeqc2_di" bpmnElement="SequenceFlow_1tpeqc2">
-        <di:waypoint x="755" y="190" />
-        <di:waypoint x="890" y="190" />
+        <di:waypoint x="755" y="390" />
+        <di:waypoint x="890" y="390" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="756" y="170" width="43" height="40" />
+          <dc:Bounds x="757" y="370" width="42" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1ifqpkz_di" bpmnElement="SequenceFlow_1ifqpkz">
-        <di:waypoint x="730" y="165" />
-        <di:waypoint x="730" y="80" />
-        <di:waypoint x="1940" y="80" />
-        <di:waypoint x="1940" y="172" />
+        <di:waypoint x="730" y="365" />
+        <di:waypoint x="730" y="100" />
+        <di:waypoint x="1940" y="100" />
+        <di:waypoint x="1940" y="372" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="763" y="60" width="34" height="40" />
+          <dc:Bounds x="763" y="80" width="34" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0a66w8u_di" bpmnElement="SequenceFlow_0a66w8u">
-        <di:waypoint x="468" y="190" />
-        <di:waypoint x="560" y="190" />
+        <di:waypoint x="468" y="390" />
+        <di:waypoint x="560" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1vpa6hw_di" bpmnElement="SequenceFlow_1vpa6hw">
-        <di:waypoint x="300" y="165" />
-        <di:waypoint x="300" y="80" />
-        <di:waypoint x="610" y="80" />
-        <di:waypoint x="610" y="150" />
+        <di:waypoint x="300" y="365" />
+        <di:waypoint x="300" y="280" />
+        <di:waypoint x="610" y="280" />
+        <di:waypoint x="610" y="350" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="348" y="60" width="43" height="40" />
+          <dc:Bounds x="349" y="260" width="42" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1lvmxbc_di" bpmnElement="SequenceFlow_1lvmxbc">
-        <di:waypoint x="300" y="215" />
-        <di:waypoint x="300" y="290" />
-        <di:waypoint x="610" y="290" />
-        <di:waypoint x="610" y="230" />
+        <di:waypoint x="300" y="415" />
+        <di:waypoint x="300" y="490" />
+        <di:waypoint x="610" y="490" />
+        <di:waypoint x="610" y="430" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="353" y="270" width="34" height="40" />
+          <dc:Bounds x="353" y="470" width="34" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0el1opp_di" bpmnElement="SequenceFlow_0el1opp">
-        <di:waypoint x="325" y="190" />
-        <di:waypoint x="432" y="190" />
+        <di:waypoint x="325" y="390" />
+        <di:waypoint x="432" y="390" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="350" y="172" width="40" height="14" />
+          <dc:Bounds x="350" y="372" width="40" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_06dkri2_di" bpmnElement="SequenceFlow_06dkri2">
-        <di:waypoint x="188" y="190" />
-        <di:waypoint x="275" y="190" />
+        <di:waypoint x="188" y="390" />
+        <di:waypoint x="275" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1xvniql_di" bpmnElement="SequenceFlow_1xvniql">
-        <di:waypoint x="1790" y="190" />
-        <di:waypoint x="1922" y="190" />
+        <di:waypoint x="1870" y="390" />
+        <di:waypoint x="1922" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0pqzqvx_di" bpmnElement="Flow_0pqzqvx">
+        <di:waypoint x="1470" y="220" />
+        <di:waypoint x="1530" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mq2f8q_di" bpmnElement="Flow_0mq2f8q">
+        <di:waypoint x="1160" y="415" />
+        <di:waypoint x="1160" y="510" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1122" y="473" width="76" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ka22mr_di" bpmnElement="Flow_0ka22mr">
+        <di:waypoint x="1318" y="390" />
+        <di:waypoint x="1370" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yexdcj_di" bpmnElement="Flow_0yexdcj">
+        <di:waypoint x="1630" y="390" />
+        <di:waypoint x="1682" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vh71xd_di" bpmnElement="Flow_0vh71xd">
+        <di:waypoint x="1470" y="390" />
+        <di:waypoint x="1530" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1iemxxk_di" bpmnElement="Flow_1iemxxk">
+        <di:waypoint x="1718" y="760" />
+        <di:waypoint x="1820" y="760" />
+        <di:waypoint x="1820" y="430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16nwnc7_di" bpmnElement="Flow_16nwnc7">
+        <di:waypoint x="1630" y="220" />
+        <di:waypoint x="1820" y="220" />
+        <di:waypoint x="1820" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1dz9jl4_di" bpmnElement="Flow_1dz9jl4">
+        <di:waypoint x="1470" y="760" />
+        <di:waypoint x="1530" y="760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05c1ch9_di" bpmnElement="Flow_05c1ch9">
+        <di:waypoint x="1630" y="760" />
+        <di:waypoint x="1682" y="760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0psgs31_di" bpmnElement="Flow_0psgs31">
+        <di:waypoint x="1160" y="590" />
+        <di:waypoint x="1160" y="652" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0bdfwte_di" bpmnElement="Flow_0bdfwte">
+        <di:waypoint x="1160" y="688" />
+        <di:waypoint x="1160" y="735" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09jopi4_di" bpmnElement="Flow_09jopi4">
+        <di:waypoint x="1185" y="760" />
+        <di:waypoint x="1370" y="760" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1213" y="742" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nfq4e0_di" bpmnElement="Flow_1nfq4e0">
+        <di:waypoint x="1470" y="890" />
+        <di:waypoint x="1530" y="890" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x59ngy_di" bpmnElement="Flow_1x59ngy">
+        <di:waypoint x="1160" y="785" />
+        <di:waypoint x="1160" y="890" />
+        <di:waypoint x="1370" y="890" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1168" y="813" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0aglupt_di" bpmnElement="Flow_0aglupt">
+        <di:waypoint x="1630" y="890" />
+        <di:waypoint x="1820" y="890" />
+        <di:waypoint x="1820" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
-        <dc:Bounds x="152" y="172" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1w5f0v4_di" bpmnElement="task-update-consumer-assets">
-        <dc:Bounds x="1690" y="150" width="100" height="80" />
+        <dc:Bounds x="152" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="EndEvent_0wly3a7">
-        <dc:Bounds x="1922" y="172" width="36" height="36" />
+        <dc:Bounds x="1922" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-update-payin-status">
-        <dc:Bounds x="560" y="150" width="100" height="80" />
+        <dc:Bounds x="560" y="350" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateCatchEvent_1ny355w_di" bpmnElement="event-payin-updated">
-        <dc:Bounds x="432" y="172" width="36" height="36" />
+        <dc:Bounds x="432" y="372" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="416" y="122" width="69" height="40" />
+          <dc:Bounds x="416" y="322" width="69" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_0zhxp6m_di" bpmnElement="check-payin-status-on-startup" isMarkerVisible="true">
-        <dc:Bounds x="275" y="165" width="50" height="50" />
+        <dc:Bounds x="275" y="365" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="197" y="213" width="85" height="40" />
+          <dc:Bounds x="197" y="413" width="85" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_1bdn5ty_di" bpmnElement="check-payin-status-from-message" isMarkerVisible="true">
-        <dc:Bounds x="705" y="165" width="50" height="50" />
+        <dc:Bounds x="705" y="365" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="697" y="230" width="65" height="40" />
+          <dc:Bounds x="697" y="430" width="65" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_1a6btgb_di" bpmnElement="check-delivery-method" isMarkerVisible="true">
-        <dc:Bounds x="1135" y="165" width="50" height="50" />
+        <dc:Bounds x="1135" y="365" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1122" y="110" width="75" height="40" />
+          <dc:Bounds x="1122" y="423" width="75" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="IntermediateCatchEvent_14ltt4w_di" bpmnElement="event-provider-send-order">
-        <dc:Bounds x="1142" y="312" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1119" y="357.5" width="81" height="53" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Activity_1r2p8y0_di" bpmnElement="send-mail-order-confirmed">
+        <dc:Bounds x="890" y="350" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1w5f0v4_di" bpmnElement="task-update-consumer-assets">
+        <dc:Bounds x="1770" y="350" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1xarruu_di" bpmnElement="send-mail-asset-shipped">
+        <dc:Bounds x="1530" y="350" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateCatchEvent_0njxtr1_di" bpmnElement="event-consumer-delivery">
-        <dc:Bounds x="1592" y="312" width="36" height="36" />
+        <dc:Bounds x="1682" y="372" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1566" y="363" width="90" height="40" />
+          <dc:Bounds x="1656" y="423" width="90" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1631ixp_di" bpmnElement="send_notification_asset_shipped">
-        <dc:Bounds x="1280" y="290" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_1631ixp_di" bpmnElement="send-notification-asset-shipped">
+        <dc:Bounds x="1370" y="350" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1xarruu_di" bpmnElement="send_mail_asset_shipped">
-        <dc:Bounds x="1450" y="290" width="100" height="80" />
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_14ltt4w_di" bpmnElement="event-provider-send-order">
+        <dc:Bounds x="1282" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1259" y="418" width="81" height="53" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_03re1ob_di" bpmnElement="send_notification_downloadable_asset">
-        <dc:Bounds x="1280" y="150" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_0r4cjw1_di" bpmnElement="send-mail-downloadable-asset">
+        <dc:Bounds x="1530" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0r4cjw1_di" bpmnElement="send_mail_downloadable_asset">
-        <dc:Bounds x="1450" y="150" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_03re1ob_di" bpmnElement="send-notification-downloadable-asset">
+        <dc:Bounds x="1370" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1r2p8y0_di" bpmnElement="send_mail_order_confirmed">
-        <dc:Bounds x="890" y="150" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_0c0y09q_di" bpmnElement="send-mail-purchase-status">
+        <dc:Bounds x="1110" y="510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1bkqn6e_di" bpmnElement="is-purchase-approved" isMarkerVisible="true">
+        <dc:Bounds x="1135" y="735" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1066" y="746" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1vyyd1c_di" bpmnElement="send-notification-purchase-approved">
+        <dc:Bounds x="1370" y="720" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_119nwpl_di" bpmnElement="sen-mail-purchase-approved">
+        <dc:Bounds x="1530" y="720" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0af5j6u_di" bpmnElement="Event_0af5j6u">
+        <dc:Bounds x="1682" y="742" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1656" y="793" width="90" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1axjjnw_di" bpmnElement="send-mail-purchase-rejected">
+        <dc:Bounds x="1530" y="850" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11sy0x0_di" bpmnElement="send-notification-purchase-rejected">
+        <dc:Bounds x="1370" y="850" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0v41vzy_di" bpmnElement="event-provider-approve-order">
+        <dc:Bounds x="1142" y="652" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1084" y="650" width="48" height="40" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
