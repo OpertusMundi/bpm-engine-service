@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="workflow-system-database-maintenance" name="Database Maintenance" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="event-start">
+      <bpmn:outgoing>SequenceFlow_18zciyn</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_0wly3a7">
+      <bpmn:incoming>SequenceFlow_0pgtju7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="task-resize-images" name="Resize Images&#10;" camunda:type="external" camunda:topic="resizeImages">
+      <bpmn:incoming>SequenceFlow_0el1opp</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0698sza</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="check-image-resize-task">
+      <bpmn:incoming>SequenceFlow_18zciyn</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1vpa6hw</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_0el1opp</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1vpa6hw" name="&#10;" sourceRef="check-image-resize-task" targetRef="complete-image-resize-task">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resizeImages==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="complete-image-resize-task" name="&#10;">
+      <bpmn:incoming>SequenceFlow_1vpa6hw</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0698sza</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0pgtju7</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0pgtju7" sourceRef="complete-image-resize-task" targetRef="EndEvent_0wly3a7" />
+    <bpmn:sequenceFlow id="SequenceFlow_0el1opp" sourceRef="check-image-resize-task" targetRef="task-resize-images">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resizeImages==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_18zciyn" sourceRef="event-start" targetRef="check-image-resize-task" />
+    <bpmn:sequenceFlow id="SequenceFlow_0698sza" sourceRef="task-resize-images" targetRef="complete-image-resize-task" />
+  </bpmn:process>
+  <bpmn:message id="Message_1njwliz" name="payout-updated-message" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-system-database-maintenance">
+      <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
+        <dc:Bounds x="152" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="EndEvent_0wly3a7">
+        <dc:Bounds x="772" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-resize-images">
+        <dc:Bounds x="400" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0zhxp6m_di" bpmnElement="check-image-resize-task" isMarkerVisible="true">
+        <dc:Bounds x="265" y="165" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="385" y="200" width="71" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vpa6hw_di" bpmnElement="SequenceFlow_1vpa6hw">
+        <di:waypoint x="290" y="165" />
+        <di:waypoint x="290" y="80" />
+        <di:waypoint x="620" y="80" />
+        <di:waypoint x="620" y="165" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="346" y="50" width="55" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1bdn5ty_di" bpmnElement="complete-image-resize-task" isMarkerVisible="true">
+        <dc:Bounds x="595" y="165" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="620" y="230" width="0" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0pgtju7_di" bpmnElement="SequenceFlow_0pgtju7">
+        <di:waypoint x="645" y="190" />
+        <di:waypoint x="772" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0el1opp_di" bpmnElement="SequenceFlow_0el1opp">
+        <di:waypoint x="315" y="190" />
+        <di:waypoint x="400" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="339" y="172" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_18zciyn_di" bpmnElement="SequenceFlow_18zciyn">
+        <di:waypoint x="188" y="190" />
+        <di:waypoint x="265" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0698sza_di" bpmnElement="SequenceFlow_0698sza">
+        <di:waypoint x="500" y="190" />
+        <di:waypoint x="595" y="190" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
