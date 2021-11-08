@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
   <bpmn:process id="workflow-process-order-with-payin" name="Process Order with PayIn " isExecutable="true" camunda:versionTag="1.0.0">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_06dkri2</bpmn:outgoing>
@@ -81,7 +81,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
-          <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="notificationType">PHYSICAL_DELIVERY_BY_SUPPLIER</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -91,7 +91,7 @@
     <bpmn:serviceTask id="send-mail-asset-shipped" name="Send Mail Asset Shipped" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="mailType">CONSUMER_PHYSICAL_DELIVERY_BY_SUPPLIER</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -104,7 +104,7 @@
     <bpmn:serviceTask id="send-mail-order-confirmed" name="Send Mail Order Confirmed" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="mailType">ORDER_CONFIRMATION</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -116,7 +116,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
-          <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="notificationType">ORDER_CONFIRMATION</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -127,7 +127,7 @@
     <bpmn:serviceTask id="send-mail-downloadable-asset-by-supplier" name="Send Mail Downloadable Asset" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="mailType">CONSUMER_DIGITAL_DELIVERY_BY_SUPPLIER</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -138,7 +138,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
-          <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="notificationType">DIGITAL_DELIVERY_BY_SUPPLIER</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -177,7 +177,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
-          <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="notificationType">DIGITAL_DELIVERY_BY_PLATFORM</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -187,7 +187,7 @@
     <bpmn:serviceTask id="send-mai-downloadable-asset" name="Send Mail Downloadable Asset" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
       <bpmn:extensionElements>
         <camunda:inputOutput>
-          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailRecipient">${consumerKey}</camunda:inputParameter>
           <camunda:inputParameter name="mailType">CONSUMER_DIGITAL_DELIVERY_BY_PLATFORM</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
