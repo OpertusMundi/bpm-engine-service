@@ -119,6 +119,8 @@ steps:
     - tag
   settings:
     debug: true
+    build_args:
+    - git_commit=${DRONE_COMMIT}
     username: 
       from_secret: docker_username
     password:
@@ -133,6 +135,8 @@ steps:
     - tag
   settings:
     debug: true
+    build_args:
+    - git_commit=${DRONE_COMMIT}
     username: 
       from_secret: registry_username
     password:

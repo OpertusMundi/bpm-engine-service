@@ -16,6 +16,8 @@ RUN mvn -B compile -DenableDockerBuildProfile
 
 FROM openjdk:8-jre-alpine
 
+ARG git_commit=
+
 COPY --from=build-stage-1 /app/target/ /app/
 
 RUN addgroup spring && adduser -H -D -G spring spring
@@ -34,6 +36,8 @@ ENV DATABASE_URL="jdbc:postgresql://localhost:5432/opertusmundi" \
     DATABASE_PASSWORD_FILE="/secrets/database-password" \
     CAMUNDA_ADMIN_USERNAME="admin" \
     CAMUNDA_ADMIN_PASSWORD_FILE="/secrets/camunda-admin-password"
+
+ENV GIT_COMMIT=${git_commit}
 
 USER spring
 ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
