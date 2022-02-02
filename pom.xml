@@ -25,7 +25,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <dependency.locations.enabled>false</dependency.locations.enabled>
         <java.version>1.8</java.version>
-        <postgresql.version>42.2.19</postgresql.version>
         <git-commit-id.skip>false</git-commit-id.skip>
     </properties>
 
@@ -159,7 +158,7 @@
 			<artifactId>spring-boot-properties-migrator</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-	   
+
         <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -194,13 +193,13 @@
             <groupId>org.camunda.bpm.springboot</groupId>
             <artifactId>camunda-bpm-spring-boot-starter-rest</artifactId>
         </dependency>
-        
+
         <!-- Add support for JSON serialization on in/out variables in Camunda -->
         <dependency>
             <groupId>org.camunda.spin</groupId>
             <artifactId>camunda-spin-core</artifactId>
         </dependency>
- 
+
         <dependency>
             <groupId>org.camunda.spin</groupId>
             <artifactId>camunda-spin-dataformat-json-jackson</artifactId>
@@ -210,7 +209,7 @@
             <groupId>org.camunda.bpm</groupId>
             <artifactId>camunda-engine-plugin-spin</artifactId>
         </dependency>
-        
+
     </dependencies>
 
     <build>
@@ -228,7 +227,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<!-- Inject version information into the build -->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
