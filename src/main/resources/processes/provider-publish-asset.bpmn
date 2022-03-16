@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="workflow-provider-publish-asset" name="Provider Publish Asset" isExecutable="true" camunda:versionTag="1.0.0">
+  <bpmn:process id="provider-publish-asset" name="Provider publish asset" isExecutable="true" camunda:versionTag="1.0.1">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
     </bpmn:startEvent>
@@ -191,7 +191,7 @@
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-provider-publish-asset">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-publish-asset">
       <bpmndi:BPMNEdge id="Flow_04x0rr0_di" bpmnElement="Flow_04x0rr0">
         <di:waypoint x="1030" y="160" />
         <di:waypoint x="1100" y="160" />
