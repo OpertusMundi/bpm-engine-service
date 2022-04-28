@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-registration" name="Provider registration" isExecutable="true" camunda:versionTag="1.0.1">
+  <bpmn:process id="provider-registration" name="Provider registration" isExecutable="true" camunda:versionTag="1.0.2">
     <bpmn:startEvent id="StartEvent_1ie158z">
       <bpmn:outgoing>SequenceFlow_1d64fgc</bpmn:outgoing>
     </bpmn:startEvent>
@@ -12,7 +12,7 @@
       <bpmn:incoming>SequenceFlow_16qgdf9</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_14xaboj</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="create_task" name="Create" camunda:type="external" camunda:topic="createProvider">
+    <bpmn:serviceTask id="create_task" name="Create" camunda:asyncBefore="true" camunda:type="external" camunda:topic="createProvider">
       <bpmn:incoming>SequenceFlow_1hmcih4</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1q1qym5</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -30,12 +30,24 @@
     <bpmn:sequenceFlow id="SequenceFlow_1hmcih4" name="Create" sourceRef="ExclusiveGateway_0tinim9" targetRef="create_task">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isUpdate==false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:textAnnotation id="TextAnnotation_17w9piz">
-      <bpmn:text>Create or update consumer</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_1et89iw" sourceRef="ExclusiveGateway_0tinim9" targetRef="TextAnnotation_17w9piz" />
+    <bpmn:subProcess id="SubProcess_13tjngd" triggeredByEvent="true">
+      <bpmn:serviceTask id="cancel_task" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelProviderRegistration">
+        <bpmn:incoming>SequenceFlow_1utnf2j</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1w64dtk</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent_1amn9oh">
+        <bpmn:incoming>SequenceFlow_1w64dtk</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1utnf2j" sourceRef="cancel_event" targetRef="cancel_task" />
+      <bpmn:sequenceFlow id="SequenceFlow_1w64dtk" sourceRef="cancel_task" targetRef="EndEvent_1amn9oh" />
+      <bpmn:startEvent id="cancel_event">
+        <bpmn:outgoing>SequenceFlow_1utnf2j</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_01zej4l" errorRef="Error_01aay1n" />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
+  <bpmn:error id="Error_01aay1n" name="OperationHasFailed" errorCode="Operation has failed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-registration">
       <bpmndi:BPMNShape id="StartEvent_1ie158z_di" bpmnElement="StartEvent_1ie158z">
@@ -52,9 +64,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_0tinim9_di" bpmnElement="ExclusiveGateway_0tinim9" isMarkerVisible="true">
         <dc:Bounds x="315" y="285" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_17w9piz_di" bpmnElement="TextAnnotation_17w9piz">
-        <dc:Bounds x="360" y="393" width="100" height="54" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1d64fgc_di" bpmnElement="SequenceFlow_1d64fgc">
         <di:waypoint x="188" y="310" />
@@ -85,10 +94,29 @@
           <dc:Bounds x="394" y="105" width="33" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1et89iw_di" bpmnElement="Association_1et89iw">
-        <di:waypoint x="350" y="325" />
-        <di:waypoint x="396" y="393" />
+      <bpmndi:BPMNShape id="ServiceTask_109d0u9_di" bpmnElement="cancel_task">
+        <dc:Bounds x="455" y="550" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1amn9oh_di" bpmnElement="EndEvent_1amn9oh">
+        <dc:Bounds x="637" y="572" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1utnf2j_di" bpmnElement="SequenceFlow_1utnf2j">
+        <di:waypoint x="361" y="590" />
+        <di:waypoint x="455" y="590" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1w64dtk_di" bpmnElement="SequenceFlow_1w64dtk">
+        <di:waypoint x="555" y="590" />
+        <di:waypoint x="637" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SubProcess_0o7xp8l_di" bpmnElement="SubProcess_13tjngd" isExpanded="true">
+        <dc:Bounds x="285" y="490" width="450" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0tnwvl4_di" bpmnElement="cancel_event">
+        <dc:Bounds x="325" y="572" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="327" y="615" width="33" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
