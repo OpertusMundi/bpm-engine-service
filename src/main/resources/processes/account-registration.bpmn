@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="account-registration" name="Account registration" isExecutable="true" camunda:versionTag="1.0.1">
+  <bpmn:process id="account-registration" name="Account registration" isExecutable="true" camunda:versionTag="1.0.2">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_158b1lv</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_0rfddlv">
-      <bpmn:incoming>SequenceFlow_0wepzfs</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0fp7t40</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_158b1lv" sourceRef="event-start" targetRef="service_task_send_activation_token" />
     <bpmn:serviceTask id="service_task_send_activation_token" name="Send Activation Token&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
@@ -29,29 +29,18 @@
       <bpmn:incoming>SequenceFlow_1pg563t</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0fp7t40</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0fp7t40" sourceRef="service_task_activate_account" targetRef="service_task_send_confirmation_mail" />
-    <bpmn:serviceTask id="service_task_send_confirmation_mail" name="Send Confirmation Mail&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
-          <camunda:inputParameter name="mailType">ACCOUNT_ACTIVATION_SUCCESS</camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
-      <bpmn:incoming>SequenceFlow_0fp7t40</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0wepzfs</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0wepzfs" sourceRef="service_task_send_confirmation_mail" targetRef="Event_0rfddlv" />
+    <bpmn:sequenceFlow id="SequenceFlow_0fp7t40" sourceRef="service_task_activate_account" targetRef="Event_0rfddlv" />
     <bpmn:sequenceFlow id="SequenceFlow_118pwrz" sourceRef="wait_for_token_or_expire_event" targetRef="event_wait_email_verification" />
     <bpmn:eventBasedGateway id="wait_for_token_or_expire_event" name="Wait for email verification">
       <bpmn:incoming>SequenceFlow_029tpms</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_118pwrz</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_0d7bjij</bpmn:outgoing>
     </bpmn:eventBasedGateway>
-    <bpmn:intermediateCatchEvent id="event_wait_xx_days" name="Wait for 15 days">
+    <bpmn:intermediateCatchEvent id="event_wait_xx_days" name="Wait for 2 days">
       <bpmn:incoming>SequenceFlow_0d7bjij</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1nexldq</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1feckj5">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P0Y0M15DT0H0M0S</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P0Y0M2DT0H0M0S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0d7bjij" sourceRef="wait_for_token_or_expire_event" targetRef="event_wait_xx_days" />
@@ -73,7 +62,7 @@
         <dc:Bounds x="152" y="129" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="Event_0rfddlv">
-        <dc:Bounds x="1102" y="129" width="36" height="36" />
+        <dc:Bounds x="862" y="129" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_158b1lv_di" bpmnElement="SequenceFlow_158b1lv">
         <di:waypoint x="188" y="147" />
@@ -101,14 +90,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0fp7t40_di" bpmnElement="SequenceFlow_0fp7t40">
         <di:waypoint x="790" y="147" />
-        <di:waypoint x="910" y="147" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0g59bw3_di" bpmnElement="service_task_send_confirmation_mail">
-        <dc:Bounds x="910" y="107" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0wepzfs_di" bpmnElement="SequenceFlow_0wepzfs">
-        <di:waypoint x="1010" y="147" />
-        <di:waypoint x="1102" y="147" />
+        <di:waypoint x="862" y="147" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_118pwrz_di" bpmnElement="SequenceFlow_118pwrz">
         <di:waypoint x="505" y="147" />
@@ -123,7 +105,7 @@
       <bpmndi:BPMNShape id="IntermediateCatchEvent_05lz4yb_di" bpmnElement="event_wait_xx_days">
         <dc:Bounds x="582" y="232" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="560" y="275" width="80" height="14" />
+          <dc:Bounds x="563" y="275" width="74" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0d7bjij_di" bpmnElement="SequenceFlow_0d7bjij">
@@ -132,18 +114,18 @@
         <di:waypoint x="582" y="250" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1bi92zm_di" bpmnElement="service_task_cancel_registration">
-        <dc:Bounds x="800" y="210" width="100" height="80" />
+        <dc:Bounds x="690" y="210" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0xmmtfp_di" bpmnElement="EndEvent_0xmmtfp">
-        <dc:Bounds x="1102" y="232" width="36" height="36" />
+        <dc:Bounds x="862" y="232" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1lufy2w_di" bpmnElement="SequenceFlow_1lufy2w">
-        <di:waypoint x="900" y="250" />
-        <di:waypoint x="1102" y="250" />
+        <di:waypoint x="790" y="250" />
+        <di:waypoint x="862" y="250" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1nexldq_di" bpmnElement="SequenceFlow_1nexldq">
         <di:waypoint x="618" y="250" />
-        <di:waypoint x="800" y="250" />
+        <di:waypoint x="690" y="250" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
