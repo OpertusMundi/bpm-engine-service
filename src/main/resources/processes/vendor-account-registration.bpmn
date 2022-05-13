@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="vendor-account-registration" name="Vendor account registration" isExecutable="true" camunda:versionTag="1.0.1">
+  <bpmn:process id="vendor-account-registration" name="Vendor account registration" isExecutable="true" camunda:versionTag="1.0.2">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_158b1lv</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_0rfddlv">
-      <bpmn:incoming>SequenceFlow_0wepzfs</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0fp7t40</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_158b1lv" sourceRef="event-start" targetRef="service_task_send_invitation" />
     <bpmn:serviceTask id="service_task_send_invitation" name="Send Invitation&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
@@ -28,18 +28,7 @@
       <bpmn:incoming>SequenceFlow_1pg563t</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0fp7t40</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0fp7t40" sourceRef="service_task_activate_vendor_account" targetRef="service_task_send_confirmation_mail" />
-    <bpmn:serviceTask id="service_task_send_confirmation_mail" name="Send Confirmation Mail&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
-      <bpmn:extensionElements>
-        <camunda:inputOutput>
-          <camunda:inputParameter name="mailRecipient">${userKey}</camunda:inputParameter>
-          <camunda:inputParameter name="mailType">VENDOR_ACCOUNT_ACTIVATION_SUCCESS</camunda:inputParameter>
-        </camunda:inputOutput>
-      </bpmn:extensionElements>
-      <bpmn:incoming>SequenceFlow_0fp7t40</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0wepzfs</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0wepzfs" sourceRef="service_task_send_confirmation_mail" targetRef="Event_0rfddlv" />
+    <bpmn:sequenceFlow id="SequenceFlow_0fp7t40" sourceRef="service_task_activate_vendor_account" targetRef="Event_0rfddlv" />
     <bpmn:sequenceFlow id="SequenceFlow_0ars5p4" sourceRef="service_task_send_invitation" targetRef="event_wait_email_verification" />
   </bpmn:process>
   <bpmn:message id="Message_02wipga" />
@@ -51,7 +40,7 @@
         <dc:Bounds x="152" y="129" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="Event_0rfddlv">
-        <dc:Bounds x="1102" y="129" width="36" height="36" />
+        <dc:Bounds x="892" y="129" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_158b1lv_di" bpmnElement="SequenceFlow_158b1lv">
         <di:waypoint x="188" y="147" />
@@ -75,14 +64,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0fp7t40_di" bpmnElement="SequenceFlow_0fp7t40">
         <di:waypoint x="740" y="147" />
-        <di:waypoint x="910" y="147" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ServiceTask_0g59bw3_di" bpmnElement="service_task_send_confirmation_mail">
-        <dc:Bounds x="910" y="107" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_0wepzfs_di" bpmnElement="SequenceFlow_0wepzfs">
-        <di:waypoint x="1010" y="147" />
-        <di:waypoint x="1102" y="147" />
+        <di:waypoint x="892" y="147" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0ars5p4_di" bpmnElement="SequenceFlow_0ars5p4">
         <di:waypoint x="370" y="147" />
