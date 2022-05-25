@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-publish-asset" name="Provider publish asset" isExecutable="true" camunda:versionTag="1.0.1">
+  <bpmn:process id="provider-publish-asset" name="Provider publish asset" isExecutable="true" camunda:versionTag="1.0.2">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
     </bpmn:startEvent>
@@ -188,8 +188,41 @@
       <bpmn:incoming>SequenceFlow_0vmqkco</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_13gs2xv</bpmn:outgoing>
     </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess_0sue111" triggeredByEvent="true">
+      <bpmn:serviceTask id="task-cancel-publish" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelPublish">
+        <bpmn:incoming>SequenceFlow_0qru8s9</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_19ey3iv</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:startEvent id="event-cancel-start">
+        <bpmn:outgoing>SequenceFlow_1mwqqpk</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_1tnz0kq" errorRef="Error_13sh7ja" />
+      </bpmn:startEvent>
+      <bpmn:endEvent id="event-cancel-end">
+        <bpmn:incoming>SequenceFlow_0aj0dld</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:userTask id="task-helpdesk-set-error" name="Review Error Message">
+        <bpmn:incoming>SequenceFlow_1mwqqpk</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0qru8s9</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="send-notification-publishing-cancelled" name="Send&#10;Notification Publishing Cancelled" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="notificationRecipientType">PROVIDER</camunda:inputParameter>
+            <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
+            <camunda:inputParameter name="notificationType">ASSET_PUBLISHING_CANCELLED</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_19ey3iv</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0aj0dld</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0aj0dld" sourceRef="send-notification-publishing-cancelled" targetRef="event-cancel-end" />
+      <bpmn:sequenceFlow id="SequenceFlow_1mwqqpk" sourceRef="event-cancel-start" targetRef="task-helpdesk-set-error" />
+      <bpmn:sequenceFlow id="SequenceFlow_0qru8s9" sourceRef="task-helpdesk-set-error" targetRef="task-cancel-publish" />
+      <bpmn:sequenceFlow id="SequenceFlow_19ey3iv" sourceRef="task-cancel-publish" targetRef="send-notification-publishing-cancelled" />
+    </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
+  <bpmn:error id="Error_13sh7ja" name="OperationHasFailed" errorCode="Operation has failed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-publish-asset">
       <bpmndi:BPMNEdge id="Flow_04x0rr0_di" bpmnElement="Flow_04x0rr0">
@@ -381,6 +414,40 @@
       <bpmndi:BPMNShape id="ServiceTask_1uu0m8p_di" bpmnElement="task-create-samples">
         <dc:Bounds x="1500" y="277" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0sue111_di" bpmnElement="SubProcess_0sue111" isExpanded="true">
+        <dc:Bounds x="220" y="500" width="850" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1b4asec_di" bpmnElement="task-cancel-publish">
+        <dc:Bounds x="600" y="550" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1lomxkr_di" bpmnElement="event-cancel-start">
+        <dc:Bounds x="260" y="572" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1od3h65_di" bpmnElement="event-cancel-end">
+        <dc:Bounds x="982" y="572" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_11r3836_di" bpmnElement="task-helpdesk-set-error">
+        <dc:Bounds x="410" y="550" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_02lfsb6_di" bpmnElement="send-notification-publishing-cancelled">
+        <dc:Bounds x="790" y="550" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0aj0dld_di" bpmnElement="SequenceFlow_0aj0dld">
+        <di:waypoint x="890" y="590" />
+        <di:waypoint x="982" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1mwqqpk_di" bpmnElement="SequenceFlow_1mwqqpk">
+        <di:waypoint x="296" y="590" />
+        <di:waypoint x="410" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0qru8s9_di" bpmnElement="SequenceFlow_0qru8s9">
+        <di:waypoint x="510" y="590" />
+        <di:waypoint x="600" y="590" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_19ey3iv_di" bpmnElement="SequenceFlow_19ey3iv">
+        <di:waypoint x="700" y="590" />
+        <di:waypoint x="790" y="590" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
