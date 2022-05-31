@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="consumer-copy-resource-to-drive" name="Copy resource to Topio Drive" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="event-start">
+      <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="event-end-success">
+      <bpmn:incoming>SequenceFlow_04hf4hf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1ye7rh0" sourceRef="event-start" targetRef="task-copy-resource-to-drive" />
+    <bpmn:serviceTask id="task-copy-resource-to-drive" name="Copy Resource to Drive&#10;" camunda:type="external" camunda:topic="copyResourceToDrive">
+      <bpmn:incoming>Flow_1ye7rh0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0jaeuon</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="send-success-notification" name="Send Success&#10;Notification&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">COPY_FILE_TO_TOPIO_DRIVE_SUCCESS</camunda:inputParameter>
+          <camunda:inputParameter name="assetId">${assetId}</camunda:inputParameter>
+          <camunda:inputParameter name="resourceKey">${resourceKey}</camunda:inputParameter>
+          <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
+          <camunda:inputParameter name="resourceFileName">${resourceFileName}</camunda:inputParameter>
+          <camunda:inputParameter name="assetVersion">${assetVersion}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0jaeuon</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_04hf4hf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0jaeuon" sourceRef="task-copy-resource-to-drive" targetRef="send-success-notification" />
+    <bpmn:sequenceFlow id="SequenceFlow_04hf4hf" sourceRef="send-success-notification" targetRef="event-end-success" />
+    <bpmn:boundaryEvent id="error_event" attachedToRef="task-copy-resource-to-drive">
+      <bpmn:outgoing>SequenceFlow_0rni0zi</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_19s8jag" errorRef="Error_1fzhri5" />
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="send-error-notification" name="Send Error&#10;Notification&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationRecipientType">CONSUMER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${userKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">COPY_FILE_TO_TOPIO_DRIVE_ERROR</camunda:inputParameter>
+          <camunda:inputParameter name="assetId">${assetId}</camunda:inputParameter>
+          <camunda:inputParameter name="resourceKey">${resourceKey}</camunda:inputParameter>
+          <camunda:inputParameter name="assetName">${assetName}</camunda:inputParameter>
+          <camunda:inputParameter name="resourceFileName">${resourceFileName}</camunda:inputParameter>
+          <camunda:inputParameter name="assetVersion">${assetVersion}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0rni0zi</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1dgx9wo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="event-end-error">
+      <bpmn:incoming>SequenceFlow_1dgx9wo</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1dgx9wo" sourceRef="send-error-notification" targetRef="event-end-error" />
+    <bpmn:sequenceFlow id="SequenceFlow_0rni0zi" sourceRef="error_event" targetRef="send-error-notification" />
+  </bpmn:process>
+  <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
+  <bpmn:error id="Error_1fzhri5" name="OperationHasFailed" errorCode="Operation has failed" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="consumer-copy-resource-to-drive">
+      <bpmndi:BPMNEdge id="Flow_1ye7rh0_di" bpmnElement="Flow_1ye7rh0">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="260" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="event-start">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="event-end-success">
+        <dc:Bounds x="722" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_14s06b5_di" bpmnElement="task-copy-resource-to-drive">
+        <dc:Bounds x="260" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0srm50r_di" bpmnElement="send-success-notification">
+        <dc:Bounds x="500" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0jaeuon_di" bpmnElement="SequenceFlow_0jaeuon">
+        <di:waypoint x="360" y="120" />
+        <di:waypoint x="500" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_04hf4hf_di" bpmnElement="SequenceFlow_04hf4hf">
+        <di:waypoint x="600" y="120" />
+        <di:waypoint x="722" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_1idrluy_di" bpmnElement="error_event">
+        <dc:Bounds x="292" y="142" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0ncxbwx_di" bpmnElement="send-error-notification">
+        <dc:Bounds x="500" y="220" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1pmjt1w_di" bpmnElement="event-end-error">
+        <dc:Bounds x="722" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1dgx9wo_di" bpmnElement="SequenceFlow_1dgx9wo">
+        <di:waypoint x="600" y="260" />
+        <di:waypoint x="722" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0rni0zi_di" bpmnElement="SequenceFlow_0rni0zi">
+        <di:waypoint x="310" y="178" />
+        <di:waypoint x="310" y="260" />
+        <di:waypoint x="500" y="260" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
