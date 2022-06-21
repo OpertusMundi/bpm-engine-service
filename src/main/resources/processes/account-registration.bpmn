@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="account-registration" name="Account registration" isExecutable="true" camunda:versionTag="1.0.2">
+  <bpmn:process id="account-registration" name="Account registration" isExecutable="true" camunda:versionTag="1.0.4">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_158b1lv</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_0rfddlv">
-      <bpmn:incoming>SequenceFlow_0fp7t40</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1jiuwyd</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1760fay</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_158b1lv" sourceRef="event-start" targetRef="service_task_send_activation_token" />
     <bpmn:serviceTask id="service_task_send_activation_token" name="Send Activation Token&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
@@ -29,7 +30,7 @@
       <bpmn:incoming>SequenceFlow_1pg563t</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0fp7t40</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_0fp7t40" sourceRef="service_task_activate_account" targetRef="Event_0rfddlv" />
+    <bpmn:sequenceFlow id="SequenceFlow_0fp7t40" sourceRef="service_task_activate_account" targetRef="check-consumer-registration" />
     <bpmn:sequenceFlow id="SequenceFlow_118pwrz" sourceRef="wait_for_token_or_expire_event" targetRef="event_wait_email_verification" />
     <bpmn:eventBasedGateway id="wait_for_token_or_expire_event" name="Wait for email verification">
       <bpmn:incoming>SequenceFlow_029tpms</bpmn:incoming>
@@ -53,16 +54,48 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="SequenceFlow_1lufy2w" sourceRef="service_task_cancel_registration" targetRef="EndEvent_0xmmtfp" />
     <bpmn:sequenceFlow id="SequenceFlow_1nexldq" sourceRef="event_wait_xx_days" targetRef="service_task_cancel_registration" />
+    <bpmn:exclusiveGateway id="check-consumer-registration" name="Register Consumer?">
+      <bpmn:incoming>SequenceFlow_0fp7t40</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0vnelvq</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1760fay</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0vnelvq" name="Yes" sourceRef="check-consumer-registration" targetRef="service_task_register_consumer">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${registerConsumer==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="service_task_register_consumer" name="Register Consumer" camunda:type="external" camunda:topic="createConsumer">
+      <bpmn:incoming>SequenceFlow_0vnelvq</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1jiuwyd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1jiuwyd" sourceRef="service_task_register_consumer" targetRef="Event_0rfddlv" />
+    <bpmn:sequenceFlow id="SequenceFlow_1760fay" name="No" sourceRef="check-consumer-registration" targetRef="Event_0rfddlv">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${registerConsumer==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:subProcess id="SubProcess_1key5ka" triggeredByEvent="true">
+      <bpmn:serviceTask id="ServiceTask_12v50yh" name="Cancel Consumer Registration" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelConsumerRegistration">
+        <bpmn:incoming>SequenceFlow_1qacc02</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0hcnyqg</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent_0dc0mat">
+        <bpmn:incoming>SequenceFlow_0hcnyqg</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:startEvent id="cancel_consumer_registration_event">
+        <bpmn:outgoing>SequenceFlow_1qacc02</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_1xe3xla" errorRef="Error_1vsnkws" />
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_0hcnyqg" sourceRef="ServiceTask_12v50yh" targetRef="EndEvent_0dc0mat" />
+      <bpmn:sequenceFlow id="SequenceFlow_1qacc02" sourceRef="cancel_consumer_registration_event" targetRef="ServiceTask_12v50yh" />
+    </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
   <bpmn:message id="Message_0e1pfea" name="email-verified-message" />
+  <bpmn:error id="Error_1vsnkws" name="OperationHasFailed" errorCode="0002" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="account-registration">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="event-start">
         <dc:Bounds x="152" y="129" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0rfddlv_di" bpmnElement="Event_0rfddlv">
-        <dc:Bounds x="862" y="129" width="36" height="36" />
+        <dc:Bounds x="1252" y="129" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_158b1lv_di" bpmnElement="SequenceFlow_158b1lv">
         <di:waypoint x="188" y="147" />
@@ -90,7 +123,7 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0fp7t40_di" bpmnElement="SequenceFlow_0fp7t40">
         <di:waypoint x="790" y="147" />
-        <di:waypoint x="862" y="147" />
+        <di:waypoint x="855" y="147" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_118pwrz_di" bpmnElement="SequenceFlow_118pwrz">
         <di:waypoint x="505" y="147" />
@@ -103,29 +136,81 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="IntermediateCatchEvent_05lz4yb_di" bpmnElement="event_wait_xx_days">
-        <dc:Bounds x="582" y="232" width="36" height="36" />
+        <dc:Bounds x="582" y="372" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="563" y="275" width="74" height="14" />
+          <dc:Bounds x="563" y="415" width="74" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0d7bjij_di" bpmnElement="SequenceFlow_0d7bjij">
         <di:waypoint x="480" y="172" />
-        <di:waypoint x="480" y="250" />
-        <di:waypoint x="582" y="250" />
+        <di:waypoint x="480" y="390" />
+        <di:waypoint x="582" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_1bi92zm_di" bpmnElement="service_task_cancel_registration">
-        <dc:Bounds x="690" y="210" width="100" height="80" />
+        <dc:Bounds x="690" y="350" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0xmmtfp_di" bpmnElement="EndEvent_0xmmtfp">
-        <dc:Bounds x="862" y="232" width="36" height="36" />
+        <dc:Bounds x="862" y="372" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1lufy2w_di" bpmnElement="SequenceFlow_1lufy2w">
-        <di:waypoint x="790" y="250" />
-        <di:waypoint x="862" y="250" />
+        <di:waypoint x="790" y="390" />
+        <di:waypoint x="862" y="390" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1nexldq_di" bpmnElement="SequenceFlow_1nexldq">
-        <di:waypoint x="618" y="250" />
-        <di:waypoint x="690" y="250" />
+        <di:waypoint x="618" y="390" />
+        <di:waypoint x="690" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1kz5n8n_di" bpmnElement="check-consumer-registration" isMarkerVisible="true">
+        <dc:Bounds x="855" y="122" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="852" y="92" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0vnelvq_di" bpmnElement="SequenceFlow_0vnelvq">
+        <di:waypoint x="905" y="147" />
+        <di:waypoint x="1030" y="147" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="958" y="129" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0i1j8lv_di" bpmnElement="service_task_register_consumer">
+        <dc:Bounds x="1030" y="107" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1jiuwyd_di" bpmnElement="SequenceFlow_1jiuwyd">
+        <di:waypoint x="1130" y="147" />
+        <di:waypoint x="1252" y="147" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1760fay_di" bpmnElement="SequenceFlow_1760fay">
+        <di:waypoint x="880" y="172" />
+        <di:waypoint x="880" y="270" />
+        <di:waypoint x="1270" y="270" />
+        <di:waypoint x="1270" y="165" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="934" y="252" width="14" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SubProcess_1key5ka_di" bpmnElement="SubProcess_1key5ka" isExpanded="true">
+        <dc:Bounds x="840" y="460" width="450" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_12v50yh_di" bpmnElement="ServiceTask_12v50yh">
+        <dc:Bounds x="1010" y="520" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0dc0mat_di" bpmnElement="EndEvent_0dc0mat">
+        <dc:Bounds x="1192" y="542" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1v5d9b4_di" bpmnElement="cancel_consumer_registration_event">
+        <dc:Bounds x="880" y="542" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="866" y="585" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0hcnyqg_di" bpmnElement="SequenceFlow_0hcnyqg">
+        <di:waypoint x="1110" y="560" />
+        <di:waypoint x="1192" y="560" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1qacc02_di" bpmnElement="SequenceFlow_1qacc02">
+        <di:waypoint x="916" y="560" />
+        <di:waypoint x="1010" y="560" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
