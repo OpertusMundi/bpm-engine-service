@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="consumer-copy-resource-to-drive" name="Copy resource to Topio Drive" isExecutable="true" camunda:versionTag="1.0.0">
+  <bpmn:process id="consumer-copy-resource-to-drive" name="Copy resource to Topio Drive" isExecutable="true" camunda:versionTag="1.0.1">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
     </bpmn:startEvent>
@@ -57,7 +57,7 @@
     <bpmn:sequenceFlow id="SequenceFlow_0rni0zi" sourceRef="error_event" targetRef="send-error-notification" />
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
-  <bpmn:error id="Error_1fzhri5" name="OperationHasFailed" errorCode="Operation has failed" />
+  <bpmn:error id="Error_1fzhri5" name="OperationHasFailed" errorCode="0005" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="consumer-copy-resource-to-drive">
       <bpmndi:BPMNEdge id="Flow_1ye7rh0_di" bpmnElement="Flow_1ye7rh0">

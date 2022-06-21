@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-registration" name="Provider registration" isExecutable="true" camunda:versionTag="1.0.2">
+  <bpmn:process id="provider-registration" name="Provider registration" isExecutable="true" camunda:versionTag="1.0.3">
     <bpmn:startEvent id="StartEvent_1ie158z">
       <bpmn:outgoing>SequenceFlow_1d64fgc</bpmn:outgoing>
     </bpmn:startEvent>
@@ -47,7 +47,7 @@
     </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
-  <bpmn:error id="Error_01aay1n" name="OperationHasFailed" errorCode="Operation has failed" />
+  <bpmn:error id="Error_01aay1n" name="OperationHasFailed" errorCode="0003" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-registration">
       <bpmndi:BPMNShape id="StartEvent_1ie158z_di" bpmnElement="StartEvent_1ie158z">
