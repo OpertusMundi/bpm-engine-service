@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="consumer-purchase-asset-without-payin" name="Consumer purchase asset without PayIn " isExecutable="true" camunda:versionTag="1.0.2">
+  <bpmn:process id="consumer-purchase-asset-without-payin" name="Purchase Asset without PayIn " isExecutable="true" camunda:versionTag="1.0.3">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>Flow_0sipzwe</bpmn:outgoing>
     </bpmn:startEvent>
