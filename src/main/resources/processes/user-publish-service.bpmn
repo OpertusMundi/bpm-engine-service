@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="user-publish-service" name="Publish User Service" isExecutable="true" camunda:versionTag="1.0.9">
+    <bpmn:startEvent id="event-start">
+      <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1ye7rh0" sourceRef="event-start" targetRef="task-automated-metadata" />
+    <bpmn:serviceTask id="task-automated-metadata" name="Compute Automated Metadata" camunda:type="external" camunda:topic="computeAutomatedMetadata">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="requestType">USER_SERVICE</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ye7rh0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1vy35ju</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="task-ingest-service" name="Ingest Service" camunda:asyncBefore="true" camunda:type="external" camunda:topic="ingest">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="ownerKey">${ownerKey}</camunda:inputParameter>
+          <camunda:inputParameter name="serviceKey">${serviceKey}</camunda:inputParameter>
+          <camunda:inputParameter name="parentKey">${parentKey}</camunda:inputParameter>
+          <camunda:inputParameter name="requestType">USER_SERVICE</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1vy35ju</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1y8picu</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1y8picu" sourceRef="task-ingest-service" targetRef="send-user-notification-publish" />
+    <bpmn:serviceTask id="send-user-notification-publish" name="Send Success&#10;Notification" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="notificationRecipientType">USER</camunda:inputParameter>
+          <camunda:inputParameter name="notificationRecipient">${ownerKey}</camunda:inputParameter>
+          <camunda:inputParameter name="notificationType">USER_SERVICE_PUBLISH_SUCCESS</camunda:inputParameter>
+          <camunda:inputParameter name="serviceTitle">${serviceTitle}</camunda:inputParameter>
+          <camunda:inputParameter name="serviceVersion">${serviceVersion}</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1y8picu</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0vsb00w</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="SubProcess_0sue111" triggeredByEvent="true">
+      <bpmn:serviceTask id="task-cancel-publish" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelPublish">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="requestType">USER_SERVICE</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0qru8s9</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_19ey3iv</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:startEvent id="event-cancel-start">
+        <bpmn:outgoing>SequenceFlow_1mwqqpk</bpmn:outgoing>
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_1tnz0kq" errorRef="Error_13sh7ja" />
+      </bpmn:startEvent>
+      <bpmn:endEvent id="event-cancel-end">
+        <bpmn:incoming>SequenceFlow_0aj0dld</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:userTask id="task-publish-user-service-set-error" name="Set Custom Helpdesk Error&#10;">
+        <bpmn:incoming>SequenceFlow_1mwqqpk</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0qru8s9</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:serviceTask id="send-user-notification-error" name="Send Cancel&#10;Notification" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="notificationRecipientType">USER</camunda:inputParameter>
+            <camunda:inputParameter name="notificationRecipient">${ownerKey}</camunda:inputParameter>
+            <camunda:inputParameter name="notificationType">USER_SERVICE_PUBLISH_FAILURE</camunda:inputParameter>
+            <camunda:inputParameter name="serviceTitle">${serviceTitle}</camunda:inputParameter>
+            <camunda:inputParameter name="serviceVersion">${serviceVersion}</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_19ey3iv</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0aj0dld</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0aj0dld" sourceRef="send-user-notification-error" targetRef="event-cancel-end" />
+      <bpmn:sequenceFlow id="SequenceFlow_1mwqqpk" sourceRef="event-cancel-start" targetRef="task-publish-user-service-set-error" />
+      <bpmn:sequenceFlow id="SequenceFlow_0qru8s9" sourceRef="task-publish-user-service-set-error" targetRef="task-cancel-publish" />
+      <bpmn:sequenceFlow id="SequenceFlow_19ey3iv" sourceRef="task-cancel-publish" targetRef="send-user-notification-error" />
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="SequenceFlow_1vy35ju" sourceRef="task-automated-metadata" targetRef="task-ingest-service" />
+    <bpmn:sequenceFlow id="SequenceFlow_0vsb00w" sourceRef="send-user-notification-publish" targetRef="event-end" />
+    <bpmn:endEvent id="event-end">
+      <bpmn:incoming>SequenceFlow_0vsb00w</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
+  <bpmn:error id="Error_13sh7ja" name="OperationHasFailed" errorCode="0007" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="user-publish-service">
+      <bpmndi:BPMNEdge id="SequenceFlow_1y8picu_di" bpmnElement="SequenceFlow_1y8picu">
+        <di:waypoint x="635" y="120" />
+        <di:waypoint x="730" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ye7rh0_di" bpmnElement="Flow_1ye7rh0">
+        <di:waypoint x="238" y="120" />
+        <di:waypoint x="350" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="event-start">
+        <dc:Bounds x="202" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_14s06b5_di" bpmnElement="task-automated-metadata">
+        <dc:Bounds x="350" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gos090_di" bpmnElement="task-ingest-service">
+        <dc:Bounds x="535" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ku7fkb_di" bpmnElement="send-user-notification-publish">
+        <dc:Bounds x="730" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_0sue111_di" bpmnElement="SubProcess_0sue111" isExpanded="true">
+        <dc:Bounds x="160" y="230" width="850" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1b4asec_di" bpmnElement="task-cancel-publish">
+        <dc:Bounds x="540" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_1lomxkr_di" bpmnElement="event-cancel-start">
+        <dc:Bounds x="200" y="302" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1od3h65_di" bpmnElement="event-cancel-end">
+        <dc:Bounds x="932" y="302" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_11r3836_di" bpmnElement="task-publish-user-service-set-error">
+        <dc:Bounds x="350" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_02lfsb6_di" bpmnElement="send-user-notification-error">
+        <dc:Bounds x="730" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0aj0dld_di" bpmnElement="SequenceFlow_0aj0dld">
+        <di:waypoint x="830" y="320" />
+        <di:waypoint x="932" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1mwqqpk_di" bpmnElement="SequenceFlow_1mwqqpk">
+        <di:waypoint x="236" y="320" />
+        <di:waypoint x="350" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0qru8s9_di" bpmnElement="SequenceFlow_0qru8s9">
+        <di:waypoint x="450" y="320" />
+        <di:waypoint x="540" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_19ey3iv_di" bpmnElement="SequenceFlow_19ey3iv">
+        <di:waypoint x="640" y="320" />
+        <di:waypoint x="730" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vy35ju_di" bpmnElement="SequenceFlow_1vy35ju">
+        <di:waypoint x="450" y="120" />
+        <di:waypoint x="535" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0vsb00w_di" bpmnElement="SequenceFlow_0vsb00w">
+        <di:waypoint x="830" y="120" />
+        <di:waypoint x="932" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0t5l2yg_di" bpmnElement="event-end">
+        <dc:Bounds x="932" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

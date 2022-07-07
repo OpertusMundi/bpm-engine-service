@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-publish-asset" name="Provider publish asset" isExecutable="true" camunda:versionTag="1.0.3">
+  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.6">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>Flow_1ye7rh0</bpmn:outgoing>
     </bpmn:startEvent>
@@ -14,6 +14,7 @@
           <camunda:inputParameter name="publisherKey">${publisherKey}</camunda:inputParameter>
           <camunda:inputParameter name="assetKey">${draftKey}</camunda:inputParameter>
           <camunda:inputParameter name="published">False</camunda:inputParameter>
+          <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_0hr87d8</bpmn:incoming>
@@ -56,6 +57,11 @@
       <bpmn:outgoing>SequenceFlow_1yj76t1</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="task-automated-metadata" name="Compute Automated Metadata" camunda:type="external" camunda:topic="computeAutomatedMetadata">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1ye7rh0</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1wc0qih</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -94,6 +100,7 @@
           <camunda:inputParameter name="publisherKey">${publisherKey}</camunda:inputParameter>
           <camunda:inputParameter name="assetKey">${draftKey}</camunda:inputParameter>
           <camunda:inputParameter name="published">True</camunda:inputParameter>
+          <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>SequenceFlow_110a682</bpmn:incoming>
@@ -190,6 +197,11 @@
     </bpmn:serviceTask>
     <bpmn:subProcess id="SubProcess_0sue111" triggeredByEvent="true">
       <bpmn:serviceTask id="task-cancel-publish" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelPublish">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
         <bpmn:incoming>SequenceFlow_0qru8s9</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_19ey3iv</bpmn:outgoing>
       </bpmn:serviceTask>
@@ -200,7 +212,7 @@
       <bpmn:endEvent id="event-cancel-end">
         <bpmn:incoming>SequenceFlow_0aj0dld</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:userTask id="task-helpdesk-set-error" name="Review Error Message">
+      <bpmn:userTask id="task-publish-catalogue-asset-set-error" name="Review Error Message">
         <bpmn:incoming>SequenceFlow_1mwqqpk</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0qru8s9</bpmn:outgoing>
       </bpmn:userTask>
@@ -216,8 +228,8 @@
         <bpmn:outgoing>SequenceFlow_0aj0dld</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0aj0dld" sourceRef="send-notification-publishing-cancelled" targetRef="event-cancel-end" />
-      <bpmn:sequenceFlow id="SequenceFlow_1mwqqpk" sourceRef="event-cancel-start" targetRef="task-helpdesk-set-error" />
-      <bpmn:sequenceFlow id="SequenceFlow_0qru8s9" sourceRef="task-helpdesk-set-error" targetRef="task-cancel-publish" />
+      <bpmn:sequenceFlow id="SequenceFlow_1mwqqpk" sourceRef="event-cancel-start" targetRef="task-publish-catalogue-asset-set-error" />
+      <bpmn:sequenceFlow id="SequenceFlow_0qru8s9" sourceRef="task-publish-catalogue-asset-set-error" targetRef="task-cancel-publish" />
       <bpmn:sequenceFlow id="SequenceFlow_19ey3iv" sourceRef="task-cancel-publish" targetRef="send-notification-publishing-cancelled" />
     </bpmn:subProcess>
   </bpmn:process>
@@ -426,7 +438,7 @@
       <bpmndi:BPMNShape id="EndEvent_1od3h65_di" bpmnElement="event-cancel-end">
         <dc:Bounds x="982" y="572" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="UserTask_11r3836_di" bpmnElement="task-helpdesk-set-error">
+      <bpmndi:BPMNShape id="UserTask_11r3836_di" bpmnElement="task-publish-catalogue-asset-set-error">
         <dc:Bounds x="410" y="550" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_02lfsb6_di" bpmnElement="send-notification-publishing-cancelled">
