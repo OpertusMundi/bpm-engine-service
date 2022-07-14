@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="system-maintenance-remove-all-user-data" name="System Maintenance: Remove all user data" isExecutable="true" camunda:versionTag="1.0.0">
+    <bpmn:startEvent id="event-start">
+      <bpmn:outgoing>SequenceFlow_0c0kpip</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_0wly3a7">
+      <bpmn:incoming>SequenceFlow_0698sza</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="task-delete-all-user-data" name="Delete All User Data&#10;" camunda:type="external" camunda:topic="deleteAllUserData">
+      <bpmn:incoming>SequenceFlow_0c0kpip</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0698sza</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0698sza" sourceRef="task-delete-all-user-data" targetRef="EndEvent_0wly3a7" />
+    <bpmn:sequenceFlow id="SequenceFlow_0c0kpip" sourceRef="event-start" targetRef="task-delete-all-user-data" />
+  </bpmn:process>
+  <bpmn:message id="Message_1njwliz" name="payout-updated-message" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="system-maintenance-remove-all-user-data">
+      <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="EndEvent_0wly3a7">
+        <dc:Bounds x="402" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-delete-all-user-data">
+        <dc:Bounds x="250" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0698sza_di" bpmnElement="SequenceFlow_0698sza">
+        <di:waypoint x="350" y="120" />
+        <di:waypoint x="402" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0c0kpip_di" bpmnElement="SequenceFlow_0c0kpip">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="250" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
