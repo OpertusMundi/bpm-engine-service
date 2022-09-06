@@ -1,8 +1,8 @@
 # vim: set syntax=dockerfile:
 
-#FROM maven:3.6.3-openjdk-8 as build-stage-1
+#FROM maven:3.8.6-eclipse-temurin-17-alpine as build-stage-1
 # see https://github.com/OpertusMundi/docker-library/blob/master/spring-boot-builder/Dockerfile
-FROM opertusmundi/spring-boot-builder:1-2.3.4 as build-stage-1
+FROM opertusmundi/spring-boot-builder:1-2.7.3 as build-stage-1
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY src /app/src/
 COPY resources /app/resources/
 RUN mvn -B compile -DenableDockerBuildProfile
 
-FROM openjdk:8-jre-alpine
+FROM eclipse-temurin:17-jre-alpine 
 
 ARG git_commit=
 
