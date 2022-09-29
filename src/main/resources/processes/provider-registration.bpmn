@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-registration" name="Provider Registration" isExecutable="true" camunda:versionTag="1.0.7">
+  <bpmn:process id="provider-registration" name="Provider Registration" isExecutable="true" camunda:versionTag="1.0.8">
     <bpmn:startEvent id="StartEvent_1ie158z">
       <bpmn:outgoing>SequenceFlow_1d64fgc</bpmn:outgoing>
     </bpmn:startEvent>
@@ -55,7 +55,7 @@
             <camunda:inputParameter name="notificationRecipientType">PROVIDER</camunda:inputParameter>
             <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
             <camunda:inputParameter name="notificationType">PROVIDER_REGISTRATION_CANCELLED</camunda:inputParameter>
-            <camunda:inputParameter name="idempotentKeyParam">cancellNotificationIdempotentKey</camunda:inputParameter>
+            <camunda:inputParameter name="idempotentKeyParam">cancelNotificationIdempotentKey</camunda:inputParameter>
           </camunda:inputOutput>
         </bpmn:extensionElements>
         <bpmn:incoming>SequenceFlow_1w64dtk</bpmn:incoming>
