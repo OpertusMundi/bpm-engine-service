@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-registration" name="Provider Registration" isExecutable="true" camunda:versionTag="1.0.4">
+  <bpmn:process id="provider-registration" name="Provider Registration" isExecutable="true" camunda:versionTag="1.0.7">
     <bpmn:startEvent id="StartEvent_1ie158z">
       <bpmn:outgoing>SequenceFlow_1d64fgc</bpmn:outgoing>
     </bpmn:startEvent>
@@ -32,18 +32,36 @@
     </bpmn:sequenceFlow>
     <bpmn:subProcess id="SubProcess_13tjngd" triggeredByEvent="true">
       <bpmn:serviceTask id="cancel_task" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelProviderRegistration">
-        <bpmn:incoming>SequenceFlow_1utnf2j</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0rch7ub</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1w64dtk</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:endEvent id="EndEvent_1amn9oh">
-        <bpmn:incoming>SequenceFlow_1w64dtk</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_05sbybv</bpmn:incoming>
       </bpmn:endEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_1utnf2j" sourceRef="cancel_event" targetRef="cancel_task" />
-      <bpmn:sequenceFlow id="SequenceFlow_1w64dtk" sourceRef="cancel_task" targetRef="EndEvent_1amn9oh" />
+      <bpmn:sequenceFlow id="SequenceFlow_1utnf2j" sourceRef="cancel_event" targetRef="task-provider-registration-set-error" />
+      <bpmn:sequenceFlow id="SequenceFlow_1w64dtk" sourceRef="cancel_task" targetRef="task-send-notification-registration-cancelled" />
       <bpmn:startEvent id="cancel_event">
         <bpmn:outgoing>SequenceFlow_1utnf2j</bpmn:outgoing>
         <bpmn:errorEventDefinition id="ErrorEventDefinition_01zej4l" errorRef="Error_01aay1n" />
       </bpmn:startEvent>
+      <bpmn:userTask id="task-provider-registration-set-error" name="Review Error Message">
+        <bpmn:incoming>SequenceFlow_1utnf2j</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0rch7ub</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0rch7ub" sourceRef="task-provider-registration-set-error" targetRef="cancel_task" />
+      <bpmn:serviceTask id="task-send-notification-registration-cancelled" name="Send&#10;Notification Registration Cancelled" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendNotification">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="notificationRecipientType">PROVIDER</camunda:inputParameter>
+            <camunda:inputParameter name="notificationRecipient">${startUserKey}</camunda:inputParameter>
+            <camunda:inputParameter name="notificationType">PROVIDER_REGISTRATION_CANCELLED</camunda:inputParameter>
+            <camunda:inputParameter name="idempotentKeyParam">cancellNotificationIdempotentKey</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1w64dtk</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_05sbybv</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_05sbybv" sourceRef="task-send-notification-registration-cancelled" targetRef="EndEvent_1amn9oh" />
     </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
@@ -95,28 +113,42 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="ServiceTask_109d0u9_di" bpmnElement="cancel_task">
-        <dc:Bounds x="455" y="550" width="100" height="80" />
+        <dc:Bounds x="460" y="470" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1amn9oh_di" bpmnElement="EndEvent_1amn9oh">
-        <dc:Bounds x="637" y="572" width="36" height="36" />
+        <dc:Bounds x="775" y="492" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1utnf2j_di" bpmnElement="SequenceFlow_1utnf2j">
-        <di:waypoint x="361" y="590" />
-        <di:waypoint x="455" y="590" />
+        <di:waypoint x="231" y="510" />
+        <di:waypoint x="290" y="510" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1w64dtk_di" bpmnElement="SequenceFlow_1w64dtk">
-        <di:waypoint x="555" y="590" />
-        <di:waypoint x="637" y="590" />
+        <di:waypoint x="560" y="510" />
+        <di:waypoint x="630" y="510" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="SubProcess_0o7xp8l_di" bpmnElement="SubProcess_13tjngd" isExpanded="true">
-        <dc:Bounds x="285" y="490" width="450" height="190" />
+        <dc:Bounds x="152" y="410" width="738" height="190" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_0tnwvl4_di" bpmnElement="cancel_event">
-        <dc:Bounds x="325" y="572" width="36" height="36" />
+        <dc:Bounds x="195" y="492" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="327" y="615" width="33" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_070on9i_di" bpmnElement="task-provider-registration-set-error">
+        <dc:Bounds x="290" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0rch7ub_di" bpmnElement="SequenceFlow_0rch7ub">
+        <di:waypoint x="390" y="510" />
+        <di:waypoint x="460" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1t4xa9p_di" bpmnElement="task-send-notification-registration-cancelled">
+        <dc:Bounds x="630" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_05sbybv_di" bpmnElement="SequenceFlow_05sbybv">
+        <di:waypoint x="730" y="510" />
+        <di:waypoint x="775" y="510" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
