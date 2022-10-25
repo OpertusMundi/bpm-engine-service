@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-set-default-contract" name="Set Default Provider Contract" isExecutable="true" camunda:versionTag="1.0.0">
+  <bpmn:process id="provider-update-default-contracts" name="Set Default Provider Contract" isExecutable="true" camunda:versionTag="1.0.1">
     <bpmn:startEvent id="StartEvent_1ie158z">
       <bpmn:outgoing>SequenceFlow_1akk04h</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="EndEvent_1e3ql8n">
       <bpmn:incoming>SequenceFlow_1d3wgc4</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="update_task" name="Set Default Contract" camunda:asyncBefore="true" camunda:type="external" camunda:topic="setDefaultProviderContract">
+    <bpmn:serviceTask id="update_provider_default_contracts_task" name="Update Provider Default Contracts" camunda:asyncBefore="true" camunda:type="external" camunda:topic="updateProviderDefaultContracts">
       <bpmn:incoming>SequenceFlow_1akk04h</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1d3wgc4</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="SequenceFlow_1akk04h" sourceRef="StartEvent_1ie158z" targetRef="update_task" />
-    <bpmn:sequenceFlow id="SequenceFlow_1d3wgc4" sourceRef="update_task" targetRef="EndEvent_1e3ql8n" />
+    <bpmn:sequenceFlow id="SequenceFlow_1akk04h" sourceRef="StartEvent_1ie158z" targetRef="update_provider_default_contracts_task" />
+    <bpmn:sequenceFlow id="SequenceFlow_1d3wgc4" sourceRef="update_provider_default_contracts_task" targetRef="EndEvent_1e3ql8n" />
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
   <bpmn:error id="Error_01aay1n" name="OperationHasFailed" errorCode="0003" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-set-default-contract">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-update-default-contracts">
       <bpmndi:BPMNShape id="StartEvent_1ie158z_di" bpmnElement="StartEvent_1ie158z">
         <dc:Bounds x="152" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1e3ql8n_di" bpmnElement="EndEvent_1e3ql8n">
         <dc:Bounds x="452" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1fokrsg_di" bpmnElement="update_task">
+      <bpmndi:BPMNShape id="ServiceTask_1fokrsg_di" bpmnElement="update_provider_default_contracts_task">
         <dc:Bounds x="280" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1akk04h_di" bpmnElement="SequenceFlow_1akk04h">
