@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="workflow-subscription-billing" name="Subscription Billing" isExecutable="true" camunda:versionTag="1.0.1">
+  <bpmn:process id="subscription-billing" name="Subscription Billing" isExecutable="true" camunda:versionTag="1.0.3">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_1trxrcr</bpmn:outgoing>
     </bpmn:startEvent>
@@ -14,11 +14,11 @@
     <bpmn:sequenceFlow id="SequenceFlow_1trxrcr" sourceRef="event-start" targetRef="event-start-delay" />
     <bpmn:sequenceFlow id="SequenceFlow_0hkynab" sourceRef="task-create-subscription-billing-records" targetRef="event-end" />
     <bpmn:sequenceFlow id="SequenceFlow_1lsgxjq" sourceRef="event-start-delay" targetRef="task-create-subscription-billing-records" />
-    <bpmn:intermediateCatchEvent id="event-start-delay" name="Wait for &#10;2 minutes&#10;&#10;">
+    <bpmn:intermediateCatchEvent id="event-start-delay" name="Wait for &#10;30 seconds&#10;&#10;">
       <bpmn:incoming>SequenceFlow_1trxrcr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1lsgxjq</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0670m47">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2M</bpmn:timeDuration>
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT30S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:intermediateCatchEvent>
   </bpmn:process>
@@ -27,7 +27,7 @@
   <bpmn:message id="Message_1q2gpsr" name="consumer-order-received-message" />
   <bpmn:message id="Message_1aze5a7" name="provide-approve-order-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="workflow-subscription-billing">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="subscription-billing">
       <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
         <dc:Bounds x="152" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
@@ -52,7 +52,7 @@
       <bpmndi:BPMNShape id="IntermediateCatchEvent_1mqq9aj_di" bpmnElement="event-start-delay">
         <dc:Bounds x="262" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="258" y="145" width="49" height="53" />
+          <dc:Bounds x="255" y="145" width="57" height="53" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
