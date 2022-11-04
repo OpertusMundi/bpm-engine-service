@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="subscription-billing-consumer-payin" name="Subscription Billing Payoff" isExecutable="true" camunda:versionTag="1.0.8">
+    <bpmn:startEvent id="event-start">
+      <bpmn:outgoing>SequenceFlow_06dkri2</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="task-payoff-subscription-billing-records" name="Payoff Subscription&#10;Billing Records&#10;" camunda:type="external" camunda:topic="updatePayoffSubscriptionBillingRecords">
+      <bpmn:incoming>SequenceFlow_1ju2hk8</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1d88vx8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="event-end">
+      <bpmn:incoming>Flow_0xj2447</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0ukvtf6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="task-update-payin-status" name="Update PayIn&#10;" camunda:type="external" camunda:topic="updatePayInStatus">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="payInStatusVariableName">payInStatus</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1vpa6hw</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_0a66w8u</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_1lvmxbc</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1bq7q4w</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="event-payin-updated" name="Wait for PayIn status update&#10;">
+      <bpmn:incoming>SequenceFlow_0el1opp</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0a66w8u</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0s35hx2" messageRef="Message_1njwliz" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_06dkri2" sourceRef="event-start" targetRef="check-payin-status-on-startup" />
+    <bpmn:exclusiveGateway id="check-payin-status-on-startup" name="Check PayIn Status on Startup&#10;">
+      <bpmn:incoming>SequenceFlow_06dkri2</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0el1opp</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1lvmxbc</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1vpa6hw</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_0el1opp" name="Created" sourceRef="check-payin-status-on-startup" targetRef="event-payin-updated">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='CREATED'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1lvmxbc" name="Failure&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-update-payin-status">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='FAILED'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1vpa6hw" name="Success&#10;&#10;" sourceRef="check-payin-status-on-startup" targetRef="task-update-payin-status">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_0a66w8u" sourceRef="event-payin-updated" targetRef="task-update-payin-status" />
+    <bpmn:exclusiveGateway id="check-payin-status-from-message" name="Query Status&#10;&#10;">
+      <bpmn:incoming>SequenceFlow_1bq7q4w</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1ifqpkz</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1ju2hk8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="SequenceFlow_1ifqpkz" name="Failure&#10;&#10;" sourceRef="check-payin-status-from-message" targetRef="task-cancel-payoff">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus!='SUCCEEDED'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1bq7q4w" sourceRef="task-update-payin-status" targetRef="check-payin-status-from-message" />
+    <bpmn:serviceTask id="task-create-invoice" name="Create Invoice" camunda:type="external" camunda:topic="createInvoice">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="invoiceType">SUBSCRIPTION_BILLING_INVOICE</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1d88vx8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0exv6fk</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0exv6fk" sourceRef="task-create-invoice" targetRef="send-mail-invoice" />
+    <bpmn:serviceTask id="send-mail-invoice" name="Send Mail Invoice" camunda:asyncBefore="true" camunda:type="external" camunda:topic="sendMail">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="mailRecipient">${consumerKey}</camunda:inputParameter>
+          <camunda:inputParameter name="mailType">CONSUMER_SUBSCRIPTION_BILLING_INVOICE</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0exv6fk</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xj2447</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0xj2447" sourceRef="send-mail-invoice" targetRef="event-end" />
+    <bpmn:sequenceFlow id="SequenceFlow_1ju2hk8" sourceRef="check-payin-status-from-message" targetRef="task-payoff-subscription-billing-records" />
+    <bpmn:sequenceFlow id="SequenceFlow_1d88vx8" sourceRef="task-payoff-subscription-billing-records" targetRef="task-create-invoice" />
+    <bpmn:serviceTask id="task-cancel-payoff" name="Cancel Payoff&#10;" camunda:type="external" camunda:topic="cancelPayoffSubscriptionBillingRecords">
+      <bpmn:incoming>SequenceFlow_1ifqpkz</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0ukvtf6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0ukvtf6" sourceRef="task-cancel-payoff" targetRef="event-end" />
+  </bpmn:process>
+  <bpmn:message id="Message_1njwliz" name="payin-updated-message" />
+  <bpmn:message id="Message_0721zq1" name="provider-send-order-message" />
+  <bpmn:message id="Message_1q2gpsr" name="consumer-order-received-message" />
+  <bpmn:message id="Message_1aze5a7" name="provide-approve-order-message" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="subscription-billing-consumer-payin">
+      <bpmndi:BPMNEdge id="SequenceFlow_1bq7q4w_di" bpmnElement="SequenceFlow_1bq7q4w">
+        <di:waypoint x="660" y="220" />
+        <di:waypoint x="705" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ifqpkz_di" bpmnElement="SequenceFlow_1ifqpkz">
+        <di:waypoint x="730" y="195" />
+        <di:waypoint x="730" y="100" />
+        <di:waypoint x="880" y="100" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="737" y="80" width="34" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0a66w8u_di" bpmnElement="SequenceFlow_0a66w8u">
+        <di:waypoint x="468" y="220" />
+        <di:waypoint x="560" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vpa6hw_di" bpmnElement="SequenceFlow_1vpa6hw">
+        <di:waypoint x="300" y="195" />
+        <di:waypoint x="300" y="110" />
+        <di:waypoint x="610" y="110" />
+        <di:waypoint x="610" y="180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="349" y="90" width="43" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1lvmxbc_di" bpmnElement="SequenceFlow_1lvmxbc">
+        <di:waypoint x="300" y="245" />
+        <di:waypoint x="300" y="320" />
+        <di:waypoint x="610" y="320" />
+        <di:waypoint x="610" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="353" y="300" width="34" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0el1opp_di" bpmnElement="SequenceFlow_0el1opp">
+        <di:waypoint x="325" y="220" />
+        <di:waypoint x="432" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="350" y="202" width="40" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_06dkri2_di" bpmnElement="SequenceFlow_06dkri2">
+        <di:waypoint x="188" y="220" />
+        <di:waypoint x="275" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0exv6fk_di" bpmnElement="Flow_0exv6fk">
+        <di:waypoint x="1180" y="220" />
+        <di:waypoint x="1270" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xj2447_di" bpmnElement="Flow_0xj2447">
+        <di:waypoint x="1370" y="220" />
+        <di:waypoint x="1462" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
+        <dc:Bounds x="152" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1w5f0v4_di" bpmnElement="task-payoff-subscription-billing-records">
+        <dc:Bounds x="880" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-update-payin-status">
+        <dc:Bounds x="560" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1ny355w_di" bpmnElement="event-payin-updated">
+        <dc:Bounds x="432" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="416" y="152" width="69" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0zhxp6m_di" bpmnElement="check-payin-status-on-startup" isMarkerVisible="true">
+        <dc:Bounds x="275" y="195" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="197" y="243" width="85" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1bdn5ty_di" bpmnElement="check-payin-status-from-message" isMarkerVisible="true">
+        <dc:Bounds x="705" y="195" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="697" y="260" width="65" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="event-end">
+        <dc:Bounds x="1462" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_086t0aw_di" bpmnElement="task-create-invoice">
+        <dc:Bounds x="1080" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0sspmkf_di" bpmnElement="send-mail-invoice">
+        <dc:Bounds x="1270" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ju2hk8_di" bpmnElement="SequenceFlow_1ju2hk8">
+        <di:waypoint x="755" y="220" />
+        <di:waypoint x="880" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1d88vx8_di" bpmnElement="SequenceFlow_1d88vx8">
+        <di:waypoint x="980" y="220" />
+        <di:waypoint x="1080" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1ohb7c9_di" bpmnElement="task-cancel-payoff">
+        <dc:Bounds x="880" y="60" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ukvtf6_di" bpmnElement="SequenceFlow_0ukvtf6">
+        <di:waypoint x="980" y="100" />
+        <di:waypoint x="1480" y="100" />
+        <di:waypoint x="1480" y="202" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
