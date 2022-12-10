@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.9">
+  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.13">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_18yj6wg</bpmn:outgoing>
     </bpmn:startEvent>
@@ -169,7 +169,7 @@
       <bpmn:incoming>SequenceFlow_0vmqkco</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1xos8oa</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:subProcess id="SubProcess_0sue111" triggeredByEvent="true">
+    <bpmn:subProcess id="operation_failed_subprocess" triggeredByEvent="true">
       <bpmn:serviceTask id="task-cancel-publish" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelPublish">
         <bpmn:extensionElements>
           <camunda:inputOutput>
@@ -179,11 +179,11 @@
         <bpmn:incoming>SequenceFlow_0qru8s9</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_19ey3iv</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:startEvent id="event-cancel-start">
+      <bpmn:startEvent id="event-set-error-start">
         <bpmn:outgoing>SequenceFlow_1mwqqpk</bpmn:outgoing>
-        <bpmn:errorEventDefinition id="ErrorEventDefinition_1tnz0kq" errorRef="Error_13sh7ja" />
+        <bpmn:errorEventDefinition id="ErrorEventDefinition_1tnz0kq" errorRef="Error_13sh7ja" camunda:errorCodeVariable="bpmnErrorCode" />
       </bpmn:startEvent>
-      <bpmn:endEvent id="event-cancel-end">
+      <bpmn:endEvent id="event-set-error-end">
         <bpmn:incoming>SequenceFlow_0aj0dld</bpmn:incoming>
       </bpmn:endEvent>
       <bpmn:userTask id="task-publish-catalogue-asset-set-error" name="Review Error Message">
@@ -201,8 +201,8 @@
         <bpmn:incoming>SequenceFlow_19ey3iv</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0aj0dld</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:sequenceFlow id="SequenceFlow_0aj0dld" sourceRef="send-notification-publishing-cancelled" targetRef="event-cancel-end" />
-      <bpmn:sequenceFlow id="SequenceFlow_1mwqqpk" sourceRef="event-cancel-start" targetRef="task-publish-catalogue-asset-set-error" />
+      <bpmn:sequenceFlow id="SequenceFlow_0aj0dld" sourceRef="send-notification-publishing-cancelled" targetRef="event-set-error-end" />
+      <bpmn:sequenceFlow id="SequenceFlow_1mwqqpk" sourceRef="event-set-error-start" targetRef="task-publish-catalogue-asset-set-error" />
       <bpmn:sequenceFlow id="SequenceFlow_0qru8s9" sourceRef="task-publish-catalogue-asset-set-error" targetRef="task-cancel-publish" />
       <bpmn:sequenceFlow id="SequenceFlow_19ey3iv" sourceRef="task-cancel-publish" targetRef="send-notification-publishing-cancelled" />
     </bpmn:subProcess>
@@ -229,9 +229,31 @@
     <bpmn:sequenceFlow id="SequenceFlow_169n5uw" name="No" sourceRef="ExclusiveGateway_100jvaa" targetRef="task-download-resources">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${assetType!='BUNDLE'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:subProcess id="workflow_cancelled_subprocess" triggeredByEvent="true">
+      <bpmn:serviceTask id="ServiceTask_1qu74q8" name="Cancel" camunda:asyncBefore="true" camunda:type="external" camunda:topic="cancelPublish">
+        <bpmn:extensionElements>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
+          </camunda:inputOutput>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_06mh52z</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0k48g67</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:endEvent id="EndEvent_0p1ehpt">
+        <bpmn:incoming>SequenceFlow_0k48g67</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_0k48g67" sourceRef="ServiceTask_1qu74q8" targetRef="EndEvent_0p1ehpt" />
+      <bpmn:sequenceFlow id="SequenceFlow_06mh52z" sourceRef="event-cancel-start" targetRef="ServiceTask_1qu74q8" />
+      <bpmn:startEvent id="event-cancel-start">
+        <bpmn:outgoing>SequenceFlow_06mh52z</bpmn:outgoing>
+        <bpmn:signalEventDefinition id="SignalEventDefinition_0z6yw4l" signalRef="Signal_15iuflr" />
+      </bpmn:startEvent>
+    </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
   <bpmn:error id="Error_13sh7ja" name="OperationHasFailed" errorCode="0004" />
+  <bpmn:error id="Error_0psqkij" errorCode="1000" />
+  <bpmn:signal id="Signal_15iuflr" name="cancel_signal" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="provider-publish-asset">
       <bpmndi:BPMNEdge id="Flow_04x0rr0_di" bpmnElement="Flow_04x0rr0">
@@ -389,39 +411,39 @@
       <bpmndi:BPMNShape id="ServiceTask_1uu0m8p_di" bpmnElement="task-create-samples">
         <dc:Bounds x="1880" y="277" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SubProcess_0sue111_di" bpmnElement="SubProcess_0sue111" isExpanded="true">
-        <dc:Bounds x="600" y="500" width="850" height="180" />
+      <bpmndi:BPMNShape id="SubProcess_0sue111_di" bpmnElement="operation_failed_subprocess" isExpanded="true">
+        <dc:Bounds x="290" y="510" width="850" height="180" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1b4asec_di" bpmnElement="task-cancel-publish">
-        <dc:Bounds x="980" y="550" width="100" height="80" />
+        <dc:Bounds x="670" y="560" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="StartEvent_1lomxkr_di" bpmnElement="event-cancel-start">
-        <dc:Bounds x="640" y="572" width="36" height="36" />
+      <bpmndi:BPMNShape id="StartEvent_1lomxkr_di" bpmnElement="event-set-error-start">
+        <dc:Bounds x="330" y="582" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEvent_1od3h65_di" bpmnElement="event-cancel-end">
-        <dc:Bounds x="1362" y="572" width="36" height="36" />
+      <bpmndi:BPMNShape id="EndEvent_1od3h65_di" bpmnElement="event-set-error-end">
+        <dc:Bounds x="1052" y="582" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_11r3836_di" bpmnElement="task-publish-catalogue-asset-set-error">
-        <dc:Bounds x="790" y="550" width="100" height="80" />
+        <dc:Bounds x="480" y="560" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_02lfsb6_di" bpmnElement="send-notification-publishing-cancelled">
-        <dc:Bounds x="1170" y="550" width="100" height="80" />
+        <dc:Bounds x="860" y="560" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0aj0dld_di" bpmnElement="SequenceFlow_0aj0dld">
-        <di:waypoint x="1270" y="590" />
-        <di:waypoint x="1362" y="590" />
+        <di:waypoint x="960" y="600" />
+        <di:waypoint x="1052" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1mwqqpk_di" bpmnElement="SequenceFlow_1mwqqpk">
-        <di:waypoint x="676" y="590" />
-        <di:waypoint x="790" y="590" />
+        <di:waypoint x="366" y="600" />
+        <di:waypoint x="480" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_0qru8s9_di" bpmnElement="SequenceFlow_0qru8s9">
-        <di:waypoint x="890" y="590" />
-        <di:waypoint x="980" y="590" />
+        <di:waypoint x="580" y="600" />
+        <di:waypoint x="670" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_19ey3iv_di" bpmnElement="SequenceFlow_19ey3iv">
-        <di:waypoint x="1080" y="590" />
-        <di:waypoint x="1170" y="590" />
+        <di:waypoint x="770" y="600" />
+        <di:waypoint x="860" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1xos8oa_di" bpmnElement="SequenceFlow_1xos8oa">
         <di:waypoint x="1980" y="317" />
@@ -460,6 +482,26 @@
           <dc:Bounds x="366" y="299" width="14" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SubProcess_0wrfvw4_di" bpmnElement="workflow_cancelled_subprocess" isExpanded="true">
+        <dc:Bounds x="1200" y="510" width="420" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1qu74q8_di" bpmnElement="ServiceTask_1qu74q8">
+        <dc:Bounds x="1350" y="560" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0p1ehpt_di" bpmnElement="EndEvent_0p1ehpt">
+        <dc:Bounds x="1532" y="582" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0k48g67_di" bpmnElement="SequenceFlow_0k48g67">
+        <di:waypoint x="1450" y="600" />
+        <di:waypoint x="1532" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_06mh52z_di" bpmnElement="SequenceFlow_06mh52z">
+        <di:waypoint x="1276" y="600" />
+        <di:waypoint x="1350" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1b1gkcg_di" bpmnElement="event-cancel-start">
+        <dc:Bounds x="1240" y="582" width="36" height="36" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
