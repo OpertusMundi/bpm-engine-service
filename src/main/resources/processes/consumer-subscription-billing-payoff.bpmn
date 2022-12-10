@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="subscription-billing-consumer-payin" name="Subscription Billing Payoff" isExecutable="true" camunda:versionTag="1.0.8">
+  <bpmn:process id="subscription-billing-consumer-payin" name="Subscription Billing Payoff" isExecutable="true" camunda:versionTag="1.0.9">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_06dkri2</bpmn:outgoing>
     </bpmn:startEvent>
@@ -45,7 +45,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${payInStatus=='SUCCEEDED'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="SequenceFlow_0a66w8u" sourceRef="event-payin-updated" targetRef="task-update-payin-status" />
-    <bpmn:exclusiveGateway id="check-payin-status-from-message" name="Query Status&#10;&#10;">
+    <bpmn:exclusiveGateway id="check-payin-status-from-message" name="Query Status&#10;&#10;" default="SequenceFlow_1ju2hk8">
       <bpmn:incoming>SequenceFlow_1bq7q4w</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ifqpkz</bpmn:outgoing>
       <bpmn:outgoing>SequenceFlow_1ju2hk8</bpmn:outgoing>
