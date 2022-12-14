@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="subscription-billing" name="Subscription Billing" isExecutable="true" camunda:versionTag="1.0.3">
+  <bpmn:process id="service-billing" name="Service Billing" isExecutable="true" camunda:versionTag="1.0.7">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_1trxrcr</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="event-end">
       <bpmn:incoming>SequenceFlow_0hkynab</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="task-create-subscription-billing-records" name="Create Billing Records&#10;" camunda:type="external" camunda:topic="monthlySubscriptionBilling">
+    <bpmn:serviceTask id="task-create-service-billing-records" name="Create Billing Records&#10;" camunda:type="external" camunda:topic="monthlyServiceBilling">
       <bpmn:incoming>SequenceFlow_1lsgxjq</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0hkynab</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_1trxrcr" sourceRef="event-start" targetRef="event-start-delay" />
-    <bpmn:sequenceFlow id="SequenceFlow_0hkynab" sourceRef="task-create-subscription-billing-records" targetRef="event-end" />
-    <bpmn:sequenceFlow id="SequenceFlow_1lsgxjq" sourceRef="event-start-delay" targetRef="task-create-subscription-billing-records" />
+    <bpmn:sequenceFlow id="SequenceFlow_0hkynab" sourceRef="task-create-service-billing-records" targetRef="event-end" />
+    <bpmn:sequenceFlow id="SequenceFlow_1lsgxjq" sourceRef="event-start-delay" targetRef="task-create-service-billing-records" />
     <bpmn:intermediateCatchEvent id="event-start-delay" name="Wait for &#10;30 seconds&#10;&#10;">
       <bpmn:incoming>SequenceFlow_1trxrcr</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1lsgxjq</bpmn:outgoing>
@@ -27,11 +27,11 @@
   <bpmn:message id="Message_1q2gpsr" name="consumer-order-received-message" />
   <bpmn:message id="Message_1aze5a7" name="provide-approve-order-message" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="subscription-billing">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="service-billing">
       <bpmndi:BPMNShape id="StartEvent_1b7dam8_di" bpmnElement="event-start">
         <dc:Bounds x="152" y="102" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-create-subscription-billing-records">
+      <bpmndi:BPMNShape id="ServiceTask_0gmknsk_di" bpmnElement="task-create-service-billing-records">
         <dc:Bounds x="380" y="80" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0wly3a7_di" bpmnElement="event-end">
