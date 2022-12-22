@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.13">
+  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.14">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_18yj6wg</bpmn:outgoing>
     </bpmn:startEvent>
@@ -236,18 +236,30 @@
             <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
           </camunda:inputOutput>
         </bpmn:extensionElements>
-        <bpmn:incoming>SequenceFlow_06mh52z</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0hsykop</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0k48g67</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:endEvent id="EndEvent_0p1ehpt">
         <bpmn:incoming>SequenceFlow_0k48g67</bpmn:incoming>
       </bpmn:endEvent>
       <bpmn:sequenceFlow id="SequenceFlow_0k48g67" sourceRef="ServiceTask_1qu74q8" targetRef="EndEvent_0p1ehpt" />
-      <bpmn:sequenceFlow id="SequenceFlow_06mh52z" sourceRef="event-cancel-start" targetRef="ServiceTask_1qu74q8" />
+      <bpmn:sequenceFlow id="SequenceFlow_06mh52z" sourceRef="event-cancel-start" targetRef="IntermediateCatchEvent_1r3q4ue" />
       <bpmn:startEvent id="event-cancel-start">
         <bpmn:outgoing>SequenceFlow_06mh52z</bpmn:outgoing>
         <bpmn:signalEventDefinition id="SignalEventDefinition_0z6yw4l" signalRef="Signal_15iuflr" />
       </bpmn:startEvent>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_1r3q4ue" name="Wait for &#10;10 seconds&#10;&#10;">
+        <bpmn:incoming>SequenceFlow_06mh52z</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0hsykop</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="TimerEventDefinition_0ynft20">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10S</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_0hsykop" sourceRef="IntermediateCatchEvent_1r3q4ue" targetRef="ServiceTask_1qu74q8" />
+      <bpmn:textAnnotation id="TextAnnotation_060szzc">
+        <bpmn:text>Wait for 10 seconds to avoid database transaction race condition when updating the draft status</bpmn:text>
+      </bpmn:textAnnotation>
+      <bpmn:association id="Association_05brjah" sourceRef="IntermediateCatchEvent_1r3q4ue" targetRef="TextAnnotation_060szzc" />
     </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_02wipga" name="provider-publish-asset-user-acceptance-message" />
@@ -483,25 +495,42 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="SubProcess_0wrfvw4_di" bpmnElement="workflow_cancelled_subprocess" isExpanded="true">
-        <dc:Bounds x="1200" y="510" width="420" height="180" />
+        <dc:Bounds x="1200" y="440" width="550" height="250" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ServiceTask_1qu74q8_di" bpmnElement="ServiceTask_1qu74q8">
-        <dc:Bounds x="1350" y="560" width="100" height="80" />
+        <dc:Bounds x="1500" y="560" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0p1ehpt_di" bpmnElement="EndEvent_0p1ehpt">
-        <dc:Bounds x="1532" y="582" width="36" height="36" />
+        <dc:Bounds x="1682" y="582" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0k48g67_di" bpmnElement="SequenceFlow_0k48g67">
-        <di:waypoint x="1450" y="600" />
-        <di:waypoint x="1532" y="600" />
+        <di:waypoint x="1600" y="600" />
+        <di:waypoint x="1682" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_06mh52z_di" bpmnElement="SequenceFlow_06mh52z">
         <di:waypoint x="1276" y="600" />
-        <di:waypoint x="1350" y="600" />
+        <di:waypoint x="1352" y="600" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StartEvent_1b1gkcg_di" bpmnElement="event-cancel-start">
         <dc:Bounds x="1240" y="582" width="36" height="36" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1r3q4ue_di" bpmnElement="IntermediateCatchEvent_1r3q4ue">
+        <dc:Bounds x="1352" y="582" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1345" y="625" width="57" height="53" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0hsykop_di" bpmnElement="SequenceFlow_0hsykop">
+        <di:waypoint x="1388" y="600" />
+        <di:waypoint x="1500" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_060szzc_di" bpmnElement="TextAnnotation_060szzc">
+        <dc:Bounds x="1310" y="500" width="280" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_05brjah_di" bpmnElement="Association_05brjah">
+        <di:waypoint x="1383" y="587" />
+        <di:waypoint x="1430" y="540" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
