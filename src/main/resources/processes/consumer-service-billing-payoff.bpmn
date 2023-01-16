@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1oecv1o" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="consumer-service-billing-payoff" name="Service Billing Payoff" isExecutable="true" camunda:versionTag="1.0.11">
+  <bpmn:process id="consumer-service-billing-payoff" name="Service Billing Payoff" isExecutable="true" camunda:versionTag="1.0.12">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_06dkri2</bpmn:outgoing>
     </bpmn:startEvent>
@@ -68,7 +68,7 @@
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="mailRecipient">${consumerKey}</camunda:inputParameter>
-          <camunda:inputParameter name="mailType">CONSUMER_SUBSCRIPTION_BILLING_INVOICE</camunda:inputParameter>
+          <camunda:inputParameter name="mailType">CONSUMER_SERVICE_BILLING_INVOICE</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0exv6fk</bpmn:incoming>
