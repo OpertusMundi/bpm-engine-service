@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1ueqgfk" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
-  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.15">
+  <bpmn:process id="provider-publish-asset" name="Publish Provider Asset" isExecutable="true" camunda:versionTag="1.0.16">
     <bpmn:startEvent id="event-start">
       <bpmn:outgoing>SequenceFlow_18yj6wg</bpmn:outgoing>
     </bpmn:startEvent>
@@ -66,14 +66,13 @@
       <bpmn:outgoing>SequenceFlow_110a682</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="SequenceFlow_1ov465u" name="No&#10;&#10;" sourceRef="check-service-ingest-before-review" targetRef="task-review">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${type!='SERVICE'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ingested==false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="task-ingest-service-asset" name="Ingest Service" camunda:asyncBefore="true" camunda:type="external" camunda:topic="ingest">
       <bpmn:extensionElements>
         <camunda:inputOutput>
           <camunda:inputParameter name="publisherKey">${publisherKey}</camunda:inputParameter>
           <camunda:inputParameter name="assetKey">${draftKey}</camunda:inputParameter>
-          <camunda:inputParameter name="published">True</camunda:inputParameter>
           <camunda:inputParameter name="requestType">CATALOGUE_ASSET</camunda:inputParameter>
         </camunda:inputOutput>
       </bpmn:extensionElements>
@@ -81,7 +80,7 @@
       <bpmn:outgoing>SequenceFlow_1y8picu</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="SequenceFlow_110a682" name="Yes" sourceRef="check-service-ingest-before-review" targetRef="task-ingest-service-asset">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${type=='SERVICE'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ingested==true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="task-get-capabilities" name="Get Service&#10;Capabilities&#10;" camunda:asyncBefore="true" camunda:type="external" camunda:topic="getCapabilities">
       <bpmn:extensionElements>
